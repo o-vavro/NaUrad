@@ -1,18 +1,21 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    //id 'kotlin-android-extensions'
+    id 'kotlin-kapt'
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
-//    id 'org.jetbrains.kotlin.kapt'
+    //id 'dagger.hilt.android.plugin'
+    //id 'android.navigation.safeargs.kotlin'
     id "com.google.protobuf" version "0.8.17"
 }
 
 android {
-    compileSdk 31
+    compileSdk rootProject.compileSdkVersion
 
     defaultConfig {
         applicationId "com.atlasstudio.naurad"
-        minSdk 28
-        targetSdk 31
+        minSdk rootProject.minSdkVersion
+        targetSdk rootProject.targetSdkVersion
         versionCode 1
         versionName "1.0"
 
@@ -45,6 +48,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'com.google.android.gms:play-services-maps:17.0.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
+    implementation 'pub.devrel:easypermissions:3.0.0'
 
     implementation  "androidx.datastore:datastore-core:1.0.0"
     implementation  "com.google.protobuf:protobuf-javalite:3.18.0"

@@ -1,13 +1,29 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
+    // Version definitions in a single place
+    ext {
+        // SDK and tools
+        minSdkVersion = 28
+        targetSdkVersion = 31
+        compileSdkVersion = 31
+
+        // TBD
+        gradleVersion = "7.0.3"
+        kotlinVersion = "1.5.31"
+        mapsVersionSecrets = "2.0.0"
+        navigationVersion = "2.4.0-beta02"
+        hiltVersion = "2.40"
+    }
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:7.0.2"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.31"
-        classpath "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.0"
+        classpath "com.android.tools.build:gradle:$gradleVersion"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:$mapsVersionSecrets"
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$navigationVersion"
+        classpath "com.google.dagger:hilt-android-gradle-plugin:$hiltVersion"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
