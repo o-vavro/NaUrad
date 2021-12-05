@@ -1,4 +1,4 @@
-package com.atlasstudio.naurad
+package com.atlasstudio.naurad.ui
 
 import android.content.Intent
 import android.os.Bundle

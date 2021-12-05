@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    //id 'kotlin-android-extensions'
+    id 'kotlin-parcelize'
     id 'kotlin-kapt'
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
     id 'dagger.hilt.android.plugin'
@@ -68,7 +68,7 @@ dependencies {
 
     // Room
     implementation "androidx.room:room-runtime:$roomVersion"
-    kapt "androidx.room:room-compiler:$roomVersion"
+    kapt "androidx.room:room-compiler:$roomVersion" // TBD: replace by KSP once stable
     implementation "androidx.room:room-ktx:$roomVersion"
 
     // Coroutines
@@ -77,9 +77,9 @@ dependencies {
 
     // Dagger Hilt
     implementation "com.google.dagger:hilt-android:$hiltVersion"
-    kapt "com.google.dagger:hilt-android-compiler:$hiltVersion"
+    kapt "com.google.dagger:hilt-android-compiler:$hiltVersion" // TBD: replace by KSP once existent
     implementation "androidx.hilt:hilt-navigation-fragment:$hiltAndroidXVersion"
-    kapt "androidx.hilt:hilt-compiler:$hiltAndroidXVersion"
+    kapt "androidx.hilt:hilt-compiler:$hiltAndroidXVersion" // TBD: replace by KSP once existent
 
     // Protobuf
     implementation  "com.google.protobuf:protobuf-javalite:$protoBufferLiteVersion"
@@ -99,7 +99,7 @@ kapt {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.14.0"
+        artifact = "com.google.protobuf:protoc:$protoBufferLiteVersion"
     }
 
     // Generates the java Protobuf-lite code for the Protobuf in this project. See
