@@ -11,7 +11,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.NaUrad">
+        android:theme="@style/Theme.NaUradSplashScreen">
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -29,16 +29,6 @@
             android:name=".ui.MainActivity"
             android:exported="true"
             android:label="Na Úřad">
-            <intent-filter>
-                <!--action android:name="android.intent.action.MAIN" /-->
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".ui.SplashScreenActivity"
-            android:theme="@style/SplashTheme"
-            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

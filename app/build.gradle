@@ -91,6 +91,9 @@ dependencies {
     // Google Play Maps Services
     implementation "com.google.android.gms:play-services-maps:$gmsPlayServicesMapsVersion"
     implementation "pub.devrel:easypermissions:$easyPermissionsVersion"
+
+    // Splashscreen
+    implementation "androidx.core:core-splashscreen:$splashScreenVersion"
 }
 
 kapt {
