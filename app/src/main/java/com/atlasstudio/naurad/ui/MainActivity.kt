@@ -6,10 +6,9 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.setupActionBarWithNavController
 import com.atlasstudio.naurad.R
 import dagger.hilt.android.AndroidEntryPoint
-
-const val REQUEST_CODE_LOCATION = 42   // just a random unique number
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -26,7 +25,12 @@ class MainActivity : AppCompatActivity() {
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.findNavController()
 
-        //setupActionBarWithNavController(navController)
+        setupActionBarWithNavController(navController)
         //setupWithNavController(bottomNavView, navController)
     }
+
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp() || super.onSupportNavigateUp()
+    }
+
 }

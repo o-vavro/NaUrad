@@ -1,4 +1,4 @@
-package com.atlasstudio.naurad.ui
+package com.atlasstudio.naurad.ui.maps
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -16,12 +16,13 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
+import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 
+const val REQUEST_CODE_LOCATION = 42   // just a random unique number
 
-
-
+@AndroidEntryPoint
 class MapsFragment : Fragment(R.layout.fragment_maps), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
     private lateinit var mBinding: FragmentMapsBinding
@@ -30,7 +31,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps), OnMapReadyCallback {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         super.onCreate(savedInstanceState)
 
         mBinding = FragmentMapsBinding.inflate(inflater, container, false)
@@ -39,7 +40,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps), OnMapReadyCallback {
 
     override fun onStart() {
         super.onStart()
-        val mapFragment = childFragmentManager.findFragmentById(com.atlasstudio.naurad.R.id.map) as SupportMapFragment?
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
     }
 
@@ -48,7 +49,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps), OnMapReadyCallback {
         mMap.setMapStyle(
             context?.let {
                 MapStyleOptions.loadRawResourceStyle(
-                    it, com.atlasstudio.naurad.R.raw.mapstyle)
+                    it, R.raw.mapstyle)
             })
         mMap.uiSettings.isZoomControlsEnabled = true
         mMap.uiSettings.isZoomGesturesEnabled = true
@@ -57,7 +58,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps), OnMapReadyCallback {
 
         // Add a marker in Zlin and move the camera
         val zlin = LatLng(49.230505, 17.657103)
-        mMap.addMarker(MarkerOptions().position(zlin).title(getString(com.atlasstudio.naurad.R.string.default_map_marker)))
+        mMap.addMarker(MarkerOptions().position(zlin).title(getString(R.string.default_map_marker)))
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(zlin, 14.5f))
 
         // call a method that will handle location change
@@ -72,7 +73,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps), OnMapReadyCallback {
         if (hasLocationPermission() == true) {
             mMap.isMyLocationEnabled = true
         } else {
-            EasyPermissions.requestPermissions(this, getString(com.atlasstudio.naurad.R.string.location_permissions),
+            EasyPermissions.requestPermissions(this, getString(R.string.location_permissions),
                 REQUEST_CODE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION
             )
         }
@@ -80,5 +81,10 @@ class MapsFragment : Fragment(R.layout.fragment_maps), OnMapReadyCallback {
 
     private fun hasLocationPermission(): Boolean? {
         return context?.let { EasyPermissions.hasPermissions(it, Manifest.permission.ACCESS_FINE_LOCATION) }
+    }
+
+    companion object {
+        private const val KEY_CAMERA_POSITION = "camera_position"
+        private const val KEY_LOCATION = "location"
     }
 }

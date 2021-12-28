@@ -34,6 +34,9 @@ buildscript {
         hiltVersion = "2.40.1"
         kaptVersion = "2.40.1"
         mapsVersionSecrets = "2.0.0"
+        retrofitVersion = "2.9.0"
+        okHttpVersion = "4.9.0"
+        gsonVersion = "2.8.9"
     }
     repositories {
         google()

@@ -1,13 +1,13 @@
 plugins {
-    id 'com.android.application'
-    id 'kotlin-android'
-    id 'kotlin-parcelize'
-    id 'kotlin-kapt'
-    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
-    id 'dagger.hilt.android.plugin'
-    //id 'android.navigation.safeargs.kotlin'
-    id "com.google.protobuf" version "0.8.18"
-    //id "com.github.ben-manes.versions" version "0.39.0"
+    id("com.android.application")
+    id("kotlin-android")
+    id("kotlin-parcelize")
+    id("kotlin-kapt")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("dagger.hilt.android.plugin")
+    //id("android.navigation.safeargs.kotlin")
+    id("com.google.protobuf") version "0.8.18"
+    //id("com.github.ben-manes.versions") version "0.39.0"
 }
 
 android {
@@ -94,6 +94,13 @@ dependencies {
 
     // Splashscreen
     implementation "androidx.core:core-splashscreen:$splashScreenVersion"
+
+    // Retrofit
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    implementation "com.google.code.gson:gson:$gsonVersion"
 }
 
 kapt {
