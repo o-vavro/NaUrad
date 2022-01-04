@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">Na Úřad</string>
     <string name="title_activity_maps">MainActivity</string>
+    <string name="title_fragment_maps">Select place...</string>
     <string name="default_map_marker">Marker in Zlin</string>
     <string name="location_permissions">User location is required for automatic closest address search. Please, grant location permissions to this app.</string>
+
+
+    <string name="move_the_camera">Move the camera</string>
+    <string name="tap_instructions">Tap or long press on the map</string>
+    <string name="status_text">Status will be here</string>
+
+    <string name="button_text_ok">Ok</string>
 </resources>

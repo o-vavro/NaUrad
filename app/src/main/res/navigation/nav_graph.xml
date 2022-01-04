@@ -7,6 +7,6 @@
     <fragment
         android:id="@+id/mapsFragment"
         android:name="com.atlasstudio.naurad.ui.maps.MapsFragment"
-        android:label="Select place..."
+        android:label="@string/title_fragment_maps"
         tools:layout="@layout/fragment_maps"/>
 </navigation>
