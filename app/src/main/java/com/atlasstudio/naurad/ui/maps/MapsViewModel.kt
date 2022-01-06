@@ -3,6 +3,7 @@ package com.atlasstudio.naurad.ui.maps
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.atlasstudio.naurad.data.Office
 import com.atlasstudio.naurad.repository.OfficeRepository
 import com.atlasstudio.naurad.utils.BaseResult
 import com.google.android.gms.maps.model.LatLng
@@ -29,7 +30,7 @@ class MapsViewModel @Inject constructor(
         mLastPosition = pos
         pos?.let {
             viewModelScope.launch {
-                repo.getAddressForLocation(pos)
+                repo.getLocatedOfficesForLocation(pos)
                     .onStart {
                         setLoading()
                     }
@@ -41,7 +42,8 @@ class MapsViewModel @Inject constructor(
                         hideLoading()
                         when(result) {
                             is BaseResult.Success -> {
-                                showToast("Address: %s".format(result.data))
+                                setMarkers(result.data)
+                                showToast("Success")
                             }
                             is BaseResult.Error -> {
                                 showToast(result.rawResponse.message)
@@ -62,10 +64,15 @@ class MapsViewModel @Inject constructor(
     private fun showToast(message: String){
         state.value = MapsFragmentState.ShowToast(message)
     }
+
+    private fun setMarkers(markers: List<Office?>) {
+        state.value = MapsFragmentState.SetMarkers(markers)
+    }
 }
 
 sealed class MapsFragmentState {
     object Init : MapsFragmentState()
     data class IsLoading(val isLoading: Boolean) : MapsFragmentState()
     data class ShowToast(val message : String) : MapsFragmentState()
+    data class SetMarkers(val markers : List<Office?>) : MapsFragmentState()
 }

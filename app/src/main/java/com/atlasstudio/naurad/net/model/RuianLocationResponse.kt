@@ -19,8 +19,8 @@ data class RuianLocationResponse(
         val attributes: Attributes? = null
     ) {
         data class Location(
-            val x: Double? = null,
-            val y: Double? = null,
+            val x: Double = 0.0,
+            val y: Double = 0.0,
             val spatialReference: SpatialReference? = null
         ) {
             data class SpatialReference(

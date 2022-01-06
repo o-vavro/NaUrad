@@ -1,5 +1,9 @@
 package com.atlasstudio.naurad.net.model
 
+import com.atlasstudio.naurad.data.Office
+import com.atlasstudio.naurad.data.OfficeInfo
+import com.atlasstudio.naurad.data.OfficeType
+import com.google.android.gms.maps.model.LatLng
 import com.google.gson.annotations.SerializedName
 
 data class OfficeResponse(
@@ -17,7 +21,7 @@ data class OfficeResponse(
     @SerializedName("CELNI_SPRAVA_APITALKS_ID")
     val celniSpravaApiTalksId: String? = null,
     @SerializedName("FINANCNI_URAD_APITALKS_ID")
-    val financniUradApiTalksIdD: String? = null,
+    val financniUradApiTalksId: String? = null,
     @SerializedName("CSSZ_APITALKS_ID")
     val csszApiTalksId: String? = null,
     @SerializedName("URAD_APITALKS_ID")
@@ -130,11 +134,15 @@ data class OfficeResponse(
             val psc: String? = null,
             @SerializedName("KrajNazev")
             val krajNazev: String? = null,
-        )
+        ) {
+            override fun toString(): String {
+                return (uliceNazev ?: "") + " " + (cisloDomovni ?: "") + ", " + (psc ?: "") + " " + (obecNazev ?: "")
+            }
+        }
 
         data class Email(
             @SerializedName("Polozka")
-            val polozka: List<Polozka> = listOf()
+            val polozka: Any? = null
         ) {
             data class Polozka(
                 @SerializedName("Email")
@@ -184,7 +192,11 @@ data class OfficeResponse(
             val zip: Int? = null,
             val state: String? = null,
             val fullAddress: String? = null
-        )
+        ) {
+            override fun toString(): String {
+                return (street ?: "") + " " + (cp ?: "") + ", " + (zip ?: "") + " " + (city ?: "")
+            }
+        }
 
         data class Hierarchy(
             val isMaster: Boolean = true,
@@ -193,8 +205,76 @@ data class OfficeResponse(
     }
 
     data class Soudy(
-        val krajskySoud: Urad? = null,
-        val okresniSoud: Urad? = null,
+        val krajskySoud: OfficeResponse.Urad? = null,
+        val okresniSoud: OfficeResponse.Urad? = null,
         val vrchniSoud: Urad? = null
     )
+
+    fun toOffices(): List<Office?> {
+        return listOf(
+            if(okresniSoudApiTalksId != null)
+            Office(
+                okresniSoudApiTalksId,
+                OfficeType.DistrictCourt,
+                soudy?.okresniSoud?.nazev ?: "",
+                LatLng(0.0,0.0),
+                soudy?.okresniSoud?.adresaUradu?.toString() ?: "",
+                OfficeInfo(null, null, null)
+            ) else null,
+            if(krajskySoudApiTalksId != null)
+            Office(
+                krajskySoudApiTalksId,
+                OfficeType.RegionalCourt,
+                soudy?.krajskySoud?.nazev ?: "",
+                LatLng(0.0, 0.0),
+                soudy?.krajskySoud?.adresaUradu?.toString() ?: "",
+                OfficeInfo(null, null, null)
+            ) else null,
+            if(vrchniSoudApiTalksId != null)
+            Office(
+                vrchniSoudApiTalksId,
+                OfficeType.HighCourt,
+                soudy?.vrchniSoud?.nazev ?: "",
+                LatLng(0.0, 0.0),
+                soudy?.vrchniSoud?.adresaUradu?.toString() ?: "",
+                OfficeInfo(null, null, null)
+            ) else null,
+            if(celniSpravaApiTalksId != null)
+            Office(
+                 celniSpravaApiTalksId,
+                OfficeType.CustomsOffice,
+                celniSprava?.nazev ?: "",
+                LatLng(0.0, 0.0),
+                celniSprava?.adresaUradu?.toString() ?: "",
+                OfficeInfo(null, null, null)
+            ) else null,
+            if (financniUradApiTalksId != null)
+            Office(
+                financniUradApiTalksId,
+                OfficeType.TaxOffice,
+                financiUrad?.name?.tradeName ?: "",
+                LatLng(0.0, 0.0),
+                financiUrad?.address?.toString() ?: "",
+                OfficeInfo(null, null, null)
+            ) else null,
+            if( csszApiTalksId != null)
+            Office(
+                csszApiTalksId,
+                OfficeType.LabourOffice,
+                cssz?.nazev ?: "",
+                LatLng(0.0, 0.0),
+                cssz?.adresaUradu?.toString() ?: "",
+                OfficeInfo(null, null, null)
+            ) else null,
+            if (obecniUradApiTalksId != null)
+            Office(
+                obecniUradApiTalksId,
+                OfficeType.CityGovernmentOffice,
+                obecniUrad?.nazev ?: "",
+                LatLng(0.0, 0.0),
+                obecniUrad?.adresaUradu?.toString() ?: "",
+                OfficeInfo(null, null, null)
+            ) else null
+        )
+    }
 }

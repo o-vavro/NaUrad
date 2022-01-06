@@ -23,22 +23,21 @@ enum class OfficeType : Parcelable {
 
 @Parcelize
 data class OfficeInfo (
-        val officeHours : Array<LocalDateTime>?,
-        val phoneNumber : String?,
-        val note : String?
+        var officeHours : Array<LocalDateTime>?,
+        var phoneNumber : String?,
+        var note : String?
         ) : Parcelable
 
 @Entity(tableName="office_table")
 @Parcelize
 data class Office (
         @PrimaryKey@NonNull
-        //@SerializedName("id")
         val id : String,
-        //@SerializedName("Nazev")
-        val name : String,
-        val location : LatLng,
-        val type : OfficeType,
-        val info : OfficeInfo
+        var type : OfficeType,
+        var name : String,
+        var location : LatLng,
+        var address: String,
+        var info : OfficeInfo
         ) : Parcelable
 
 

@@ -7,6 +7,8 @@ import com.atlasstudio.naurad.data.OfficeDatabase
 import com.atlasstudio.naurad.net.service.ApiTalksService
 import com.atlasstudio.naurad.net.service.EpsgService
 import com.atlasstudio.naurad.net.service.RuianService
+import com.atlasstudio.naurad.utils.SingleToArrayTypeAdapter
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -96,7 +98,9 @@ object AppModule {
     @Provides
     @Named("ApiTalksRetrofit")
     fun provideApiTalksRetrofit(okHttpClient: OkHttpClient): Retrofit = Retrofit.Builder()
-        .addConverterFactory(GsonConverterFactory.create())
+        .addConverterFactory(GsonConverterFactory.create(
+            GsonBuilder().registerTypeAdapterFactory(
+                SingleToArrayTypeAdapter.FACTORY).create()))
         .baseUrl("https://api.apitalks.store/apitalks.com/")
         .client(okHttpClient)
         .build()
