@@ -46,7 +46,7 @@ class MapsViewModel @Inject constructor(
                                 showToast("Success")
                             }
                             is BaseResult.Error -> {
-                                showToast(result.rawResponse.message)
+                                showToast(result.rawResponse)
                             }
                         }
                     }

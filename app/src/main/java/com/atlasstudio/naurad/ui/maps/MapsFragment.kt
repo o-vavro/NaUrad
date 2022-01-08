@@ -10,7 +10,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
@@ -48,8 +47,8 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
     private lateinit var mMap: GoogleMap
     private lateinit var mBinding: FragmentMapsBinding
     private lateinit var mProgress: LinearProgressIndicator
-    private lateinit var mTapTextView: TextView
-    private lateinit var mCameraTextView: TextView
+    //private lateinit var mTapTextView: TextView
+    //private lateinit var mCameraTextView: TextView
     private var mCurrentMarkers: MutableList<Marker?> = mutableListOf()
 
     private val viewModel: MapsViewModel by viewModels()
@@ -63,8 +62,8 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         observe()
         mBinding = FragmentMapsBinding.inflate(inflater, container, false)
         mProgress = mBinding.progress
-        mTapTextView = mBinding.tapText
-        mCameraTextView = mBinding.cameraText
+        //mTapTextView = mBinding.tapText
+        //mCameraTextView = mBinding.cameraText
         return mBinding.root
     }
 
@@ -100,25 +99,29 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
     }
 
     override fun onMapClick(pos: LatLng) {
-        mTapTextView.text = "tapped, point=$pos"
+        //mTapTextView.text = "tapped, point=$pos"
 
+        //mMap.clear()
+
+        //mMap.addMarker(MarkerOptions().position(pos))
+        //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(pos, 14.5f))
+
+        //viewModel.onPositionSelected(pos)
+    }
+
+    override fun onMapLongClick(pos: LatLng) {
+        //mTapTextView.text = "long pressed, point=$point"
         mMap.clear()
 
         mMap.addMarker(MarkerOptions().position(pos))
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(pos, 14.5f))
+        mMap.animateCamera(CameraUpdateFactory.newLatLng(pos))
 
         viewModel.onPositionSelected(pos)
     }
 
-    override fun onMapLongClick(point: LatLng) {
-        mTapTextView.text = "long pressed, point=$point"
-        mMap.clear()
-        viewModel.onPositionSelected(null)
-    }
-
     override fun onCameraIdle() {
         if(!::mMap.isInitialized) return
-        mCameraTextView.text = mMap.cameraPosition.toString()
+        //mCameraTextView.text = mMap.cameraPosition.toString()
     }
 
     @SuppressLint("MissingPermission")
@@ -155,7 +158,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         when(state){
             is MapsFragmentState.IsLoading -> handleLoading(state.isLoading)
             is MapsFragmentState.ShowToast -> {
-                mBinding.statusText.text = state.message
+                //mBinding.statusText.text = state.message
                 requireActivity().showToast(state.message)
             }
             is MapsFragmentState.SetMarkers -> handleMarkers(state.markers)
@@ -165,10 +168,10 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
 
     private fun handleLoading(isLoading: Boolean) {
         if (isLoading) {
-            mBinding.statusText.text = "loading..."
+            //mBinding.statusText.text = "loading..."
             mBinding.progress.show()
         } else {
-            mBinding.statusText.text = "Loaded"
+            //mBinding.statusText.text = "Loaded"
             mBinding.progress.hide()
         }
     }
@@ -208,7 +211,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
                 cameraBounds.include(it)
             }
         }
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(cameraBounds.build(), 0))
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(cameraBounds.build(), 50))
     }
 
     private fun generateSmallIcon(context: Context, resource: Int): BitmapDescriptor {

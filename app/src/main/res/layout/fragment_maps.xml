@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:indeterminate="true"/>
 
-    <TextView
+    <!--TextView
         android:id="@+id/tap_text"
         android:text="@string/tap_instructions"
         android:layout_width="match_parent"
@@ -30,7 +30,7 @@
         android:id="@+id/status_text"
         android:text="@string/status_text"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content" /-->
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:map="http://schemas.android.com/apk/res-auto"

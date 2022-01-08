@@ -2,7 +2,10 @@ package com.atlasstudio.naurad.repository
 import com.atlasstudio.naurad.data.JTSKLocation
 import com.atlasstudio.naurad.data.Office
 import com.atlasstudio.naurad.data.OfficeDao
-import com.atlasstudio.naurad.net.model.*
+import com.atlasstudio.naurad.net.model.EpsgResponse
+import com.atlasstudio.naurad.net.model.OfficeIdResponse
+import com.atlasstudio.naurad.net.model.OfficeResponse
+import com.atlasstudio.naurad.net.model.RuianAddressResponse
 import com.atlasstudio.naurad.net.service.ApiTalksService
 import com.atlasstudio.naurad.net.service.EpsgService
 import com.atlasstudio.naurad.net.service.RuianService
@@ -21,20 +24,6 @@ class OfficeRepository @Inject constructor(private val officeDao: OfficeDao,
                                            private val epsgService: EpsgService,
                                            private val ruianService: RuianService,
                                            private val apiTalksService: ApiTalksService) {
-
-    /*suspend fun getOffice(latLng: LatLng, officeType: OfficeType) : Flow<BaseResult<Office, WrappedListResponse<OfficeResponse>>> {
-        // if(officeDao.getOffice(latLng))
-        // else...
-
-    }
-
-    suspend fun getOffices(latLng: LatLng) : Flow<BaseResult<List<Office>, WrappedListResponse<OfficeResponse>>> {
-        /*offices?.let {
-            for(office in offices) {
-                officeDao.addOffice(office)
-            }
-        }*/
-    }*/
 
     suspend fun getJTSKLocation(loc: LatLng): Flow<BaseResult<List<Double>, WrappedListResponse<EpsgResponse>>> {
         return flow {
@@ -228,7 +217,7 @@ class OfficeRepository @Inject constructor(private val officeDao: OfficeDao,
         }
     }
 
-    suspend fun getLocatedOfficesForLocation(loc: LatLng) : Flow<BaseResult<List<Office?>, WrappedListResponse<OfficeResponse>>> {
+    suspend fun getLocatedOfficesForLocation(loc: LatLng) : Flow<BaseResult<List<Office?>, String>> {
         return flow {
             val epsgResponse = epsgService.convertGPStoJTSK(loc.longitude, loc.latitude)
 
@@ -236,7 +225,7 @@ class OfficeRepository @Inject constructor(private val officeDao: OfficeDao,
                 val epsgBody = epsgResponse.body()!!
 
                 val ruianResponse = ruianService.locationToAddress(JTSKLocation(epsgBody.x!!, epsgBody.y!!))
-                if(ruianResponse.isSuccessful) {
+                if(ruianResponse.isSuccessful && ruianResponse.body()!!.address != null) {
                     val ruianAddress = ruianResponse.body()!!.address!!.address
 
                     val addressParts = ruianAddress!!.split(",")
@@ -283,57 +272,57 @@ class OfficeRepository @Inject constructor(private val officeDao: OfficeDao,
                                         offices[i]?.location = LatLng(officeGPSLoc!!.y!!.toDouble(),
                                                                       officeGPSLoc!!.x!!.toDouble())
                                     } else {
-                                        val type = object : TypeToken<WrappedListResponse<EpsgResponse>>() {}.type
+                                        /*val type = object : TypeToken<WrappedListResponse<EpsgResponse>>() {}.type
                                         val err = Gson().fromJson<WrappedListResponse<OfficeResponse>>(
                                             officeGPSLocResponse.errorBody()!!.charStream(), type
                                         )!!
-                                        err.code = officeGPSLocResponse.code()
-                                        emit(BaseResult.Error(err))
+                                        err.code = officeGPSLocResponse.code()*/
+                                        emit(BaseResult.Error("Cannot find location for office!"))
                                     }
                                 } else {
-                                    val type = object : TypeToken<WrappedListResponse<RuianLocationResponse>>() {}.type
+                                    /*val type = object : TypeToken<WrappedListResponse<RuianLocationResponse>>() {}.type
                                     val err = Gson().fromJson<WrappedListResponse<OfficeResponse>>(
                                         officeLocationResponse.errorBody()!!.charStream(), type
                                     )!!
-                                    err.code = officeLocationResponse.code()
-                                    emit(BaseResult.Error(err))
+                                    err.code = officeLocationResponse.code()*/
+                                    emit(BaseResult.Error("Cannot find address for office!"))
                                 }
                             }
 
                             emit(BaseResult.Success(offices))
                         }
                         else {
-                            val type = object : TypeToken<WrappedListResponse<OfficeResponse>>() {}.type
+                            /*val type = object : TypeToken<WrappedListResponse<OfficeResponse>>() {}.type
                             val err = Gson().fromJson<WrappedListResponse<OfficeResponse>>(
                                 officeResponse.errorBody()!!.charStream(), type
                             )!!
-                            err.code = officeResponse.code()
-                            emit(BaseResult.Error(err))
+                            err.code = officeResponse.code()*/
+                            emit(BaseResult.Error("Cannot find office(s)!"))
                         }
                     }
                     else {
-                        val type = object : TypeToken<WrappedListResponse<OfficeIdResponse>>() {}.type
+                        /*val type = object : TypeToken<WrappedListResponse<OfficeIdResponse>>() {}.type
                         val err = Gson().fromJson<WrappedListResponse<OfficeResponse>>(
                             officeIdResponse.errorBody()!!.charStream(), type
                         )!!
-                        err.code = officeIdResponse.code()
-                        emit(BaseResult.Error(err))
+                        err.code = officeIdResponse.code()*/
+                        emit(BaseResult.Error("Cannot find offices!"))
                     }
                 } else {
-                    val type = object : TypeToken<WrappedListResponse<RuianAddressResponse>>() {}.type
+                    /*val type = object : TypeToken<WrappedListResponse<RuianAddressResponse>>() {}.type
                     val err = Gson().fromJson<WrappedListResponse<OfficeResponse>>(
                         ruianResponse.errorBody()!!.charStream(), type
                     )!!
-                    err.code = ruianResponse.code()
-                    emit(BaseResult.Error(err))
+                    err.code = ruianResponse.code()*/
+                    emit(BaseResult.Error("Cannot obtain address for location!"))
                 }
             } else {
-                val type = object : TypeToken<WrappedListResponse<EpsgResponse>>() {}.type
+                /*val type = object : TypeToken<WrappedListResponse<EpsgResponse>>() {}.type
                 val err = Gson().fromJson<WrappedListResponse<OfficeResponse>>(
                     epsgResponse.errorBody()!!.charStream(), type
                 )!!
-                err.code = epsgResponse.code()
-                emit(BaseResult.Error(err))
+                err.code = epsgResponse.code()*/
+                emit(BaseResult.Error("Location translation failed!"))
             }
         }
     }
