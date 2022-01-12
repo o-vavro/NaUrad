@@ -220,6 +220,8 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
 
     suspend fun getLocatedOfficesForLocation(loc: LatLng) : Flow<BaseResult<AddressedLocationWithOffices, ErrorResponseType>> {
         return flow {
+            val databaseResult = allDao.getTouchedLocationWithOffices(loc)
+
             val epsgResponse = epsgService.convertGPStoJTSK(loc.longitude, loc.latitude)
 
             if (epsgResponse.isSuccessful) {
