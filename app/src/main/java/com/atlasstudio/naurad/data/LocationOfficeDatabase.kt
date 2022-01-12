@@ -10,12 +10,14 @@ import javax.inject.Provider
 
 
 @TypeConverters(LatLngConverter::class, OfficeInfoConverter::class)
-@Database(entities = [Office::class], version = 1)
-abstract class OfficeDatabase: RoomDatabase() {
+@Database(entities = [Office::class, TouchedLocation::class, LocationOfficeCrossRef::class], version = 1)
+abstract class LocationOfficeDatabase: RoomDatabase() {
     abstract fun officeDao(): OfficeDao
+    abstract fun locationDao(): TouchedLocationDao
+    abstract fun allDao(): AllDao
 
     class Callback @Inject constructor(
-        private val database: Provider<OfficeDatabase>,
+        private val databaseLocation: Provider<LocationOfficeDatabase>,
         @ApplicationScope private val applicationScope: CoroutineScope
     ) : RoomDatabase.Callback()
 }

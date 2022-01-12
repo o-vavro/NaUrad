@@ -3,7 +3,7 @@ package com.atlasstudio.naurad.di
 import android.app.Application
 import androidx.room.Room
 import com.atlasstudio.naurad.BuildConfig
-import com.atlasstudio.naurad.data.OfficeDatabase
+import com.atlasstudio.naurad.data.LocationOfficeDatabase
 import com.atlasstudio.naurad.net.service.ApiTalksService
 import com.atlasstudio.naurad.net.service.EpsgService
 import com.atlasstudio.naurad.net.service.RuianService
@@ -33,13 +33,19 @@ object AppModule {
     fun provideDatabase(
         app: Application,
 //        callback: OfficeDatabase.Callback
-    ) = Room.databaseBuilder(app, OfficeDatabase::class.java, "office_database")
+    ) = Room.databaseBuilder(app, LocationOfficeDatabase::class.java, "location_office_database")
         .fallbackToDestructiveMigration()
         //.addCallback(callback)
         .build()
 
     @Provides
-    fun provideOfficeDao(db: OfficeDatabase) = db.officeDao()
+    fun provideOfficeDao(db: LocationOfficeDatabase) = db.officeDao()
+
+    @Provides
+    fun provideLocationDao(db: LocationOfficeDatabase) = db.locationDao()
+
+    @Provides
+    fun provideAllDao(db: LocationOfficeDatabase) = db.allDao()
 
     @Singleton
     @Provides

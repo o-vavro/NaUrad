@@ -2,7 +2,6 @@
     <string name="app_name">Na Úřad</string>
     <string name="title_activity_maps">MainActivity</string>
     <string name="title_fragment_maps">Select place...</string>
-    <string name="default_map_marker">Marker in Zlin</string>
     <string name="location_permissions">User location is required for automatic closest address search. Please, grant location permissions to this app.</string>
 
 
@@ -11,4 +10,9 @@
     <string name="status_text">Status will be here</string>
 
     <string name="button_text_ok">Ok</string>
+    <string name="location_for_office_error">Cannot find location for office!</string>
+    <string name="address_for_office_error">Cannot find address for office!</string>
+    <string name="office_not_found_error">Cannot find offices!</string>
+    <string name="address_for_location_error">Cannot obtain address for location!</string>
+    <string name="location_translation_error">Location translation failed!</string>
 </resources>

@@ -18,6 +18,7 @@ import com.atlasstudio.naurad.R
 import com.atlasstudio.naurad.data.Office
 import com.atlasstudio.naurad.data.OfficeType
 import com.atlasstudio.naurad.databinding.FragmentMapsBinding
+import com.atlasstudio.naurad.net.utils.ErrorResponseType
 import com.atlasstudio.naurad.utils.showToast
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -92,7 +93,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
 
         // Add a marker in Zlin and move the camera
         val zlin = LatLng(49.230505, 17.657103)
-        mMap.addMarker(MarkerOptions().position(viewModel.lastPosition() ?: zlin).title(getString(R.string.default_map_marker)))
+        mMap.addMarker(MarkerOptions().position(viewModel.lastPosition() ?: zlin))
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(viewModel.lastPosition() ?: zlin, 14.5f))
 
         mProgress.hide()
@@ -161,6 +162,21 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
                 //mBinding.statusText.text = state.message
                 requireActivity().showToast(state.message)
             }
+            is MapsFragmentState.ShowTypeToast -> {
+                //mBinding.statusText.text = state.message
+                requireActivity().showToast(when(state.error) {
+                    ErrorResponseType.LocationForOfficeError ->
+                        getString(R.string.location_for_office_error)
+                    ErrorResponseType.AddressForOfficeError ->
+                        getString(R.string.address_for_office_error)
+                    ErrorResponseType.OfficesNotFoundError ->
+                        getString(R.string.office_not_found_error)
+                    ErrorResponseType.AddressForLocationError ->
+                        getString(R.string.address_for_location_error)
+                    ErrorResponseType.LocationTranslationError ->
+                        getString(R.string.location_translation_error)
+                })
+            }
             is MapsFragmentState.SetMarkers -> handleMarkers(state.markers)
             is MapsFragmentState.Init -> Unit
         }
@@ -222,13 +238,13 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         }
 
         val bitmap = Bitmap.createBitmap(
-            drawable!!.intrinsicWidth,
-            drawable!!.intrinsicHeight,
+            drawable?.intrinsicWidth ?: 50,
+            drawable?.intrinsicHeight ?: 50,
             Bitmap.Config.ARGB_8888
         )
         val canvas = Canvas(bitmap)
-        drawable!!.setBounds(0, 0, canvas.getWidth(), canvas.getHeight())
-        drawable!!.draw(canvas)
+        drawable?.setBounds(0, 0, canvas.width, canvas.height)
+        drawable?.draw(canvas)
 
         return BitmapDescriptorFactory.fromBitmap(bitmap)
     }
