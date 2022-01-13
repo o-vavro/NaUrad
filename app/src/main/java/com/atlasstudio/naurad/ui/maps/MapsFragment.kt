@@ -7,9 +7,8 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
@@ -19,6 +18,7 @@ import com.atlasstudio.naurad.data.Office
 import com.atlasstudio.naurad.data.OfficeType
 import com.atlasstudio.naurad.databinding.FragmentMapsBinding
 import com.atlasstudio.naurad.net.utils.ErrorResponseType
+import com.atlasstudio.naurad.utils.onQueryTextChanged
 import com.atlasstudio.naurad.utils.showToast
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -48,8 +48,6 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
     private lateinit var mMap: GoogleMap
     private lateinit var mBinding: FragmentMapsBinding
     private lateinit var mProgress: LinearProgressIndicator
-    //private lateinit var mTapTextView: TextView
-    //private lateinit var mCameraTextView: TextView
     private var mCurrentMarkers: MutableList<Marker?> = mutableListOf()
 
     private val viewModel: MapsViewModel by viewModels()
@@ -60,11 +58,8 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         savedInstanceState: Bundle?
     ): View {
         super.onCreate(savedInstanceState)
-        observe()
         mBinding = FragmentMapsBinding.inflate(inflater, container, false)
         mProgress = mBinding.progress
-        //mTapTextView = mBinding.tapText
-        //mCameraTextView = mBinding.cameraText
         return mBinding.root
     }
 
@@ -72,6 +67,11 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         super.onStart()
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -95,6 +95,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         val zlin = LatLng(49.230505, 17.657103)
         mMap.addMarker(MarkerOptions().position(viewModel.lastPosition() ?: zlin))
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(viewModel.lastPosition() ?: zlin, 14.5f))
+        observe()
 
         mProgress.hide()
     }
@@ -247,6 +248,37 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         drawable?.draw(canvas)
 
         return BitmapDescriptorFactory.fromBitmap(bitmap)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_fragment_maps, menu)
+
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem.actionView as SearchView
+
+        searchView.onQueryTextChanged {
+
+        }
+
+        //val autoComplete = searchItem.actionView as SearchView.SearchAutoComplete
+
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_search -> {
+                true
+            }
+            R.id.action_mark_favourite -> {
+                item.isChecked = !item.isChecked
+                item.icon = context?.getDrawable(if(item.isChecked) R.drawable.ic_star else R.drawable.ic_star_border)
+                true
+            }
+            R.id.action_show_favourites -> {
+                true
+            }
+            else -> onOptionsItemSelected(item)
+        }
     }
 
     companion object {

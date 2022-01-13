@@ -299,8 +299,8 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
                             locationDao.addTouchedLocation(touchedLocation)
                             for (office in offices)
                             {
-                                officeDao.addOffice(office)
-                                office?.let {
+                                office?.let { office ->
+                                    officeDao.addOffice(office)
                                     allDao.insertLocationOfficeCrossRef(
                                         LocationOfficeCrossRef(
                                             touchedLocation.id,

@@ -12,7 +12,7 @@ data class LocationOfficeCrossRef(
 )
 
 data class LocationWithOffices(
-    @Embedded val touchedLocation: TouchedLocation,
+    @Embedded val location: TouchedLocation,
     @Relation(
         entity = Office::class,
         parentColumn = "id",
