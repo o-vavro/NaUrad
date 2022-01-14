@@ -10,9 +10,8 @@ import kotlinx.parcelize.Parcelize
 @Entity(tableName="touched_location_table")
 @Parcelize
 data class TouchedLocation(
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
     @NonNull
-    val id : Int = 0,
     var location : LatLng,
     var address: String
     ) : Parcelable

@@ -14,6 +14,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -220,7 +221,7 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
 
     suspend fun getLocatedOfficesForLocation(loc: LatLng) : Flow<BaseResult<AddressedLocationWithOffices, ErrorResponseType>> {
         return flow {
-            val databaseResult = allDao.getTouchedLocationWithOffices(loc)
+            //val databaseResult = allDao.getTouchedLocationWithOffices(loc)
 
             val epsgResponse = epsgService.convertGPStoJTSK(loc.longitude, loc.latitude)
 
@@ -275,80 +276,63 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
                                         offices[i]?.location = LatLng(officeGPSLoc!!.y!!.toDouble(),
                                                                       officeGPSLoc!!.x!!.toDouble())
                                     } else {
-                                        /*val type = object : TypeToken<WrappedListResponse<EpsgResponse>>() {}.type
-                                        val err = Gson().fromJson<WrappedListResponse<OfficeResponse>>(
-                                            officeGPSLocResponse.errorBody()!!.charStream(), type
-                                        )!!
-                                        err.code = officeGPSLocResponse.code()*/
-                                        //emit(BaseResult.Error("Cannot find location for office!"))
                                         emit(BaseResult.Error(ErrorResponseType.LocationForOfficeError))
                                     }
                                 } else {
-                                    /*val type = object : TypeToken<WrappedListResponse<RuianLocationResponse>>() {}.type
-                                    val err = Gson().fromJson<WrappedListResponse<OfficeResponse>>(
-                                        officeLocationResponse.errorBody()!!.charStream(), type
-                                    )!!
-                                    err.code = officeLocationResponse.code()*/
-                                    //emit(BaseResult.Error("Cannot find address for office!"))
                                     emit(BaseResult.Error(ErrorResponseType.AddressForOfficeError))
                                 }
                             }
 
-                            // store location in database
-                            val touchedLocation = TouchedLocation(location = loc, address = addressFilter)
-                            locationDao.addTouchedLocation(touchedLocation)
-                            for (office in offices)
-                            {
-                                office?.let { office ->
-                                    officeDao.addOffice(office)
-                                    allDao.insertLocationOfficeCrossRef(
-                                        LocationOfficeCrossRef(
-                                            touchedLocation.id,
-                                            office.id
-                                        )
-                                    )
-                                }
-                            }
-
-                            emit(BaseResult.Success(AddressedLocationWithOffices(loc, addressFilter, offices)))
+                            emit(BaseResult.Success(AddressedLocationWithOffices(loc, ruianAddress, offices)))
                         }
                         else {
-                            /*val type = object : TypeToken<WrappedListResponse<OfficeResponse>>() {}.type
-                            val err = Gson().fromJson<WrappedListResponse<OfficeResponse>>(
-                                officeResponse.errorBody()!!.charStream(), type
-                            )!!
-                            err.code = officeResponse.code()*/
-                            //emit(BaseResult.Error("Cannot find office(s)!"))
                             emit(BaseResult.Error(ErrorResponseType.OfficesNotFoundError))
                         }
                     }
                     else {
-                        /*val type = object : TypeToken<WrappedListResponse<OfficeIdResponse>>() {}.type
-                        val err = Gson().fromJson<WrappedListResponse<OfficeResponse>>(
-                            officeIdResponse.errorBody()!!.charStream(), type
-                        )!!
-                        err.code = officeIdResponse.code()*/
-                        //emit(BaseResult.Error("Cannot find offices!"))
                         emit(BaseResult.Error(ErrorResponseType.OfficesNotFoundError))
                     }
                 } else {
-                    /*val type = object : TypeToken<WrappedListResponse<RuianAddressResponse>>() {}.type
-                    val err = Gson().fromJson<WrappedListResponse<OfficeResponse>>(
-                        ruianResponse.errorBody()!!.charStream(), type
-                    )!!
-                    err.code = ruianResponse.code()*/
-                    //emit(BaseResult.Error("Cannot obtain address for location!"))
                     emit(BaseResult.Error(ErrorResponseType.AddressForLocationError))
                 }
             } else {
-                /*val type = object : TypeToken<WrappedListResponse<EpsgResponse>>() {}.type
-                val err = Gson().fromJson<WrappedListResponse<OfficeResponse>>(
-                    epsgResponse.errorBody()!!.charStream(), type
-                )!!
-                err.code = epsgResponse.code()*/
-                //emit(BaseResult.Error("Location translation failed!"))
                 emit(BaseResult.Error(ErrorResponseType.LocationTranslationError))
             }
         }
+    }
+
+    suspend fun storeLocation(location: AddressedLocationWithOffices) {
+        location.location?.let {
+            val touchedLocation =
+                TouchedLocation(location = it, address = location.address)
+            locationDao.addTouchedLocation(touchedLocation)
+            for (office in location.offices) {
+                office?.let { office ->
+                    officeDao.addOffice(office)
+                    allDao.insertLocationOfficeCrossRef(
+                        LocationOfficeCrossRef(
+                            touchedLocation.location,
+                            office.id
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    suspend fun deleteLocation(location: AddressedLocationWithOffices) {
+        location.location?.let {
+            locationDao.deleteTouchedLocation(it, location.address)
+        }
+    }
+
+    suspend fun isLocationStored(location: LatLng?): Flow<Boolean> = flow {
+        location?.let {
+            locationDao.getTouchedLocation(location)
+                .collect {
+                    emit(it != null)
+                }
+        }
+        emit(false)
     }
 }

@@ -23,9 +23,14 @@ class MapsViewModel @Inject constructor(
     val mState: StateFlow<MapsFragmentState> get() = state
 
     private var mLastLocation: AddressedLocationWithOffices = AddressedLocationWithOffices(null, "", emptyList())
+    val lastPosition: LatLng? get() = mLastLocation.location
 
-    fun lastPosition() : LatLng? {
-        return mLastLocation.location
+    fun onStart() {
+        initialize()
+    }
+
+    fun onReady() {
+        reMark()
     }
 
     fun onPositionSelected(pos: LatLng?) {
@@ -46,6 +51,7 @@ class MapsViewModel @Inject constructor(
                             is BaseResult.Success -> {
                                 setMarkers(result.data.offices)
                                 mLastLocation = result.data
+                                checkCurrentLocationFavourite()
                             }
                             is BaseResult.Error -> {
                                 showTypeToast(result.rawResponse)
@@ -55,6 +61,37 @@ class MapsViewModel @Inject constructor(
             }
         }
     }
+
+    fun storeCurrentLocation() {
+        viewModelScope.launch {
+            repo.storeLocation(mLastLocation)
+        }
+    }
+
+    fun deleteCurrentLocation() {
+        viewModelScope.launch {
+            repo.deleteLocation(mLastLocation)
+        }
+    }
+
+    fun checkCurrentLocationFavourite() {
+        viewModelScope.launch {
+            repo.isLocationStored(mLastLocation.location)
+                .collect {
+                    setFavourite(it)
+                }
+        }
+    }
+    private fun initialize() {
+        state.value = MapsFragmentState.Init
+    }
+
+    private fun reMark() {
+        mLastLocation.location?.let {
+            state.value = MapsFragmentState.SetMarkers(mLastLocation.offices)
+        }
+    }
+
     private fun setLoading(){
         state.value = MapsFragmentState.IsLoading(true)
     }
@@ -74,12 +111,17 @@ class MapsViewModel @Inject constructor(
     private fun setMarkers(markers: List<Office?>) {
         state.value = MapsFragmentState.SetMarkers(markers)
     }
+
+    private fun setFavourite(favourite: Boolean) {
+        state.value = MapsFragmentState.IsFavourite(favourite)
+    }
 }
 
 sealed class MapsFragmentState {
     object Init : MapsFragmentState()
-    data class IsLoading(val isLoading: Boolean) : MapsFragmentState()
+    data class IsLoading(val isLoading : Boolean) : MapsFragmentState()
     data class ShowToast(val message : String) : MapsFragmentState()
     data class ShowTypeToast(val error : ErrorResponseType) : MapsFragmentState()
     data class SetMarkers(val markers : List<Office?>) : MapsFragmentState()
+    data class IsFavourite(val isFavourite : Boolean) : MapsFragmentState()
 }

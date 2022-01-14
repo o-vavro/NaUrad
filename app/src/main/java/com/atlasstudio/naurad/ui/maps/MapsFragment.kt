@@ -48,6 +48,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
     private lateinit var mMap: GoogleMap
     private lateinit var mBinding: FragmentMapsBinding
     private lateinit var mProgress: LinearProgressIndicator
+    private lateinit var mMenu: Menu
     private var mCurrentMarkers: MutableList<Marker?> = mutableListOf()
 
     private val viewModel: MapsViewModel by viewModels()
@@ -67,6 +68,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         super.onStart()
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
+        viewModel.onStart()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -93,9 +95,12 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
 
         // Add a marker in Zlin and move the camera
         val zlin = LatLng(49.230505, 17.657103)
-        mMap.addMarker(MarkerOptions().position(viewModel.lastPosition() ?: zlin))
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(viewModel.lastPosition() ?: zlin, 14.5f))
+        mMap.addMarker(MarkerOptions().position(viewModel.lastPosition ?: zlin))
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(viewModel.lastPosition ?: zlin, 14.5f))
+
         observe()
+        // re-place markers
+        viewModel.onReady()
 
         mProgress.hide()
     }
@@ -179,6 +184,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
                 })
             }
             is MapsFragmentState.SetMarkers -> handleMarkers(state.markers)
+            is MapsFragmentState.IsFavourite -> handleFavourite(state.isFavourite)
             is MapsFragmentState.Init -> Unit
         }
     }
@@ -231,6 +237,12 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(cameraBounds.build(), 50))
     }
 
+    private fun handleFavourite(favourite: Boolean) {
+        var favouriteMark = mMenu.findItem(R.id.action_mark_favourite)
+        favouriteMark.isChecked = favourite
+        favouriteMark.icon = context?.getDrawable(if (favouriteMark.isChecked) R.drawable.ic_star else R.drawable.ic_star_border)
+    }
+
     private fun generateSmallIcon(context: Context, resource: Int): BitmapDescriptor {
         val drawable = context.getDrawable(resource)
 
@@ -252,6 +264,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_fragment_maps, menu)
+        mMenu = menu
 
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
@@ -259,6 +272,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         searchView.onQueryTextChanged {
 
         }
+        viewModel.checkCurrentLocationFavourite()
 
         //val autoComplete = searchItem.actionView as SearchView.SearchAutoComplete
 
@@ -270,8 +284,16 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
                 true
             }
             R.id.action_mark_favourite -> {
-                item.isChecked = !item.isChecked
-                item.icon = context?.getDrawable(if(item.isChecked) R.drawable.ic_star else R.drawable.ic_star_border)
+                viewModel.lastPosition?.let {
+                    item.isChecked = !item.isChecked
+                    if (item.isChecked) {
+                        item.icon = context?.getDrawable(R.drawable.ic_star)
+                        viewModel.storeCurrentLocation()
+                    } else {
+                        item.icon = context?.getDrawable(R.drawable.ic_star_border)
+                        viewModel.deleteCurrentLocation()
+                    }
+                }
                 true
             }
             R.id.action_show_favourites -> {
