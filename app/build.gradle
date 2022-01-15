@@ -5,7 +5,7 @@ plugins {
     id("kotlin-kapt")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("dagger.hilt.android.plugin")
-    //id("android.navigation.safeargs.kotlin")
+    id("androidx.navigation.safeargs.kotlin")
     id("com.google.protobuf") version "0.8.18"
     //id("com.github.ben-manes.versions") version "0.39.0"
 }
@@ -38,7 +38,6 @@ android {
     }
     buildFeatures {
         viewBinding true
-        dataBinding true
     }
 }
 

@@ -8,7 +8,7 @@ buildscript {
         compileSdkVersion = 31
 
         // App dependencies
-        gradleVersion = '7.0.4'
+        gradleVersion = "7.0.4"
         kotlinVersion = "1.6.0"
         appCompatVersion = "1.4.0"
 
@@ -16,7 +16,7 @@ buildscript {
         splashScreenVersion = "1.0.0-alpha01"
 
         constraintLayoutVersion = "2.1.1"
-        coroutinesVersion = "1.5.2"
+        coroutinesVersion = "1.6.0"
         dataStoreVersion = "1.0.0"
         espressoVersion = "3.4.0"
         fragmentVersion = "1.4.0"

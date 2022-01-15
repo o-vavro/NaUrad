@@ -8,5 +8,18 @@
         android:id="@+id/mapsFragment"
         android:name="com.atlasstudio.naurad.ui.maps.MapsFragment"
         android:label="@string/title_fragment_maps"
-        tools:layout="@layout/fragment_maps"/>
+        tools:layout="@layout/fragment_maps">
+        <action android:id="@+id/action_mapsFragment_to_favouritesFragment"
+                app:destination="@+id/favouritesFragment"/>
+    </fragment>
+    <fragment android:id="@+id/favouritesFragment"
+              android:name="com.atlasstudio.naurad.ui.favourites.FavouritesFragment"
+              android:label="Favourites"
+              tools:layout="@layout/fragment_favourites">
+        <argument
+            android:name="location"
+            android:defaultValue="@null"
+            app:argType="com.atlasstudio.naurad.data.TouchedLocation"
+            app:nullable="true" />
+    </fragment>
 </navigation>

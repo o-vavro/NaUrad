@@ -323,6 +323,18 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
     suspend fun deleteLocation(location: AddressedLocationWithOffices) {
         location.location?.let {
             locationDao.deleteTouchedLocation(it, location.address)
+            // delete all offices with only one ref equal to this touched location and the ref
+            for (office in location.offices) {
+                office?.let {
+                    allDao.getCrossRefsForOffice(office.id)
+                        .collect { crossRefList ->
+                            if (crossRefList.size == 1) {
+                                officeDao.deleteOffice(office)
+                            }
+                        }
+                    allDao.deleteLocationOfficeCrossRef(location.location, office.id)
+                }
+            }
         }
     }
 

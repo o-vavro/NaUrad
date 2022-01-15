@@ -10,10 +10,13 @@ import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.atlasstudio.naurad.R
+import com.atlasstudio.naurad.data.AddressedLocationWithOffices
 import com.atlasstudio.naurad.data.Office
 import com.atlasstudio.naurad.data.OfficeType
 import com.atlasstudio.naurad.databinding.FragmentMapsBinding
@@ -74,6 +77,11 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
+
+        setFragmentResultListener("favourites_request") { _, bundle ->
+            val result = bundle.getParcelable<AddressedLocationWithOffices>("favourites_result")
+            viewModel.onFavouritesResult(result)
+        }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -123,6 +131,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         mMap.addMarker(MarkerOptions().position(pos))
         mMap.animateCamera(CameraUpdateFactory.newLatLng(pos))
 
+        handleFavourite(false)
         viewModel.onPositionSelected(pos)
     }
 
@@ -185,6 +194,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
             }
             is MapsFragmentState.SetMarkers -> handleMarkers(state.markers)
             is MapsFragmentState.IsFavourite -> handleFavourite(state.isFavourite)
+            is MapsFragmentState.NavigateToFavourites -> handleShowFavourites()
             is MapsFragmentState.Init -> Unit
         }
     }
@@ -243,6 +253,11 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         favouriteMark.icon = context?.getDrawable(if (favouriteMark.isChecked) R.drawable.ic_star else R.drawable.ic_star_border)
     }
 
+    private fun handleShowFavourites() {
+        val action = MapsFragmentDirections.actionMapsFragmentToFavouritesFragment()
+        findNavController().navigate(action)
+    }
+
     private fun generateSmallIcon(context: Context, resource: Int): BitmapDescriptor {
         val drawable = context.getDrawable(resource)
 
@@ -285,18 +300,21 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
             }
             R.id.action_mark_favourite -> {
                 viewModel.lastPosition?.let {
-                    item.isChecked = !item.isChecked
-                    if (item.isChecked) {
-                        item.icon = context?.getDrawable(R.drawable.ic_star)
-                        viewModel.storeCurrentLocation()
-                    } else {
-                        item.icon = context?.getDrawable(R.drawable.ic_star_border)
-                        viewModel.deleteCurrentLocation()
+                    if (!mBinding.progress.isShown) {
+                        item.isChecked = !item.isChecked
+                        if (item.isChecked) {
+                            item.icon = context?.getDrawable(R.drawable.ic_star)
+                            viewModel.storeCurrentLocation()
+                        } else {
+                            item.icon = context?.getDrawable(R.drawable.ic_star_border)
+                            viewModel.deleteCurrentLocation()
+                        }
                     }
                 }
                 true
             }
             R.id.action_show_favourites -> {
+                viewModel.onShowFavourites()
                 true
             }
             else -> onOptionsItemSelected(item)

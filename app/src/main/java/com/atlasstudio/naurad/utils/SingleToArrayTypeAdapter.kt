@@ -12,8 +12,8 @@ import java.util.*
 
 
 class SingleToArrayTypeAdapter internal constructor(
-    val delegateAdapter: TypeAdapter<List<Any>>,
-    val elementAdapter: TypeAdapter<Any>
+    private val delegateAdapter: TypeAdapter<List<Any>>,
+    private val elementAdapter: TypeAdapter<Any>
 ) : TypeAdapter<List<Any?>?>() {
     override fun read(reader: JsonReader): List<Any> {
         return if (reader.peek() !== JsonToken.BEGIN_ARRAY) {
@@ -36,7 +36,7 @@ class SingleToArrayTypeAdapter internal constructor(
                     return null
                 }
                 val elementType =
-                    (type.type as ParameterizedType).getActualTypeArguments().get(0)
+                    (type.type as ParameterizedType).actualTypeArguments[0]
                 val delegateAdapter = gson.getDelegateAdapter(this, type) as TypeAdapter<List<Any>>
                 val elementAdapter =
                     gson.getAdapter(TypeToken.get(elementType)) as TypeAdapter<Any>

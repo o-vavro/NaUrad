@@ -62,6 +62,10 @@ class MapsViewModel @Inject constructor(
         }
     }
 
+    fun onShowFavourites() {
+        navigateToFavourites()
+    }
+
     fun storeCurrentLocation() {
         viewModelScope.launch {
             repo.storeLocation(mLastLocation)
@@ -82,6 +86,17 @@ class MapsViewModel @Inject constructor(
                 }
         }
     }
+
+    fun onFavouritesResult(location: AddressedLocationWithOffices?) {
+        location?.let {
+            viewModelScope.launch {
+                setMarkers(location.offices)
+                mLastLocation = location
+                checkCurrentLocationFavourite()
+            }
+        }
+    }
+
     private fun initialize() {
         state.value = MapsFragmentState.Init
     }
@@ -115,6 +130,10 @@ class MapsViewModel @Inject constructor(
     private fun setFavourite(favourite: Boolean) {
         state.value = MapsFragmentState.IsFavourite(favourite)
     }
+
+    private fun navigateToFavourites() {
+        state.value = MapsFragmentState.NavigateToFavourites
+    }
 }
 
 sealed class MapsFragmentState {
@@ -124,4 +143,5 @@ sealed class MapsFragmentState {
     data class ShowTypeToast(val error : ErrorResponseType) : MapsFragmentState()
     data class SetMarkers(val markers : List<Office?>) : MapsFragmentState()
     data class IsFavourite(val isFavourite : Boolean) : MapsFragmentState()
+    object NavigateToFavourites : MapsFragmentState()
 }
