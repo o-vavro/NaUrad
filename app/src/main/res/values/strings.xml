@@ -16,4 +16,6 @@
     <string name="address_for_location_error">Cannot obtain address for location!</string>
     <string name="location_translation_error">Location translation failed!</string>
     <string name="search_bar_text">Search</string>
+
+    <string name="location_deleted_confirmation">Location deleted!</string>
 </resources>

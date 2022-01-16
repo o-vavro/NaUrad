@@ -7,13 +7,13 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TouchedLocationDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addTouchedLocation(location: TouchedLocation?)
+    suspend fun addTouchedLocation(location: TouchedLocation)
 
     @Query("SELECT DISTINCT * FROM touched_location_table WHERE location LIKE :location")
-    fun getTouchedLocation(location: LatLng): Flow<TouchedLocation?>
+    fun getTouchedLocation(location: LatLng): Flow<TouchedLocation>
 
     @Query("SELECT DISTINCT * FROM touched_location_table")
-    fun getTouchedLocations(): Flow<List<TouchedLocation?>>
+    fun getTouchedLocations(): Flow<List<TouchedLocation>>
 
     @Delete
     suspend fun deleteTouchedLocation(location: TouchedLocation?)

@@ -17,7 +17,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.atlasstudio.naurad.R
 import com.atlasstudio.naurad.data.AddressedLocationWithOffices
-import com.atlasstudio.naurad.data.Office
 import com.atlasstudio.naurad.data.OfficeType
 import com.atlasstudio.naurad.databinding.FragmentMapsBinding
 import com.atlasstudio.naurad.net.utils.ErrorResponseType
@@ -192,7 +191,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
                         getString(R.string.location_translation_error)
                 })
             }
-            is MapsFragmentState.SetMarkers -> handleMarkers(state.markers)
+            is MapsFragmentState.SetMarkers -> handleMarkers(state.location)
             is MapsFragmentState.IsFavourite -> handleFavourite(state.isFavourite)
             is MapsFragmentState.NavigateToFavourites -> handleShowFavourites()
             is MapsFragmentState.Init -> Unit
@@ -209,14 +208,16 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         }
     }
 
-    private fun handleMarkers(markers: List<Office?>) {
-        for(marker in mCurrentMarkers) {
+    private fun handleMarkers(location: AddressedLocationWithOffices) {
+        /*for(marker in mCurrentMarkers) {
             marker?.remove()
-        }
+        }*/
         mCurrentMarkers.clear()
+        mMap.clear()
 
         var cameraBounds: LatLngBounds.Builder = LatLngBounds.builder()
-        for( marker in markers) {
+        // add office markers
+        for( marker in location.offices) {
             marker?.let { marker ->
                 val mark = mMap.addMarker(
                     MarkerOptions()
@@ -244,6 +245,16 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
                 cameraBounds.include(it)
             }
         }
+
+        // add selected location marker
+        location.location?.let {
+            val mark = mMap.addMarker(MarkerOptions()
+                .position(it)
+                .title(location.address))
+            mCurrentMarkers.add(mark)
+            cameraBounds.include(it)
+        }
+
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(cameraBounds.build(), 50))
     }
 

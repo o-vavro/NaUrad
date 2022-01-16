@@ -4,13 +4,15 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.atlasstudio.naurad.data.AddressedLocationWithOffices
-import com.atlasstudio.naurad.data.Office
 import com.atlasstudio.naurad.net.utils.ErrorResponseType
 import com.atlasstudio.naurad.repository.LocationOfficeRepository
 import com.atlasstudio.naurad.utils.BaseResult
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -49,7 +51,7 @@ class MapsViewModel @Inject constructor(
                         hideLoading()
                         when(result) {
                             is BaseResult.Success -> {
-                                setMarkers(result.data.offices)
+                                setMarkers(result.data)
                                 mLastLocation = result.data
                                 checkCurrentLocationFavourite()
                             }
@@ -90,7 +92,7 @@ class MapsViewModel @Inject constructor(
     fun onFavouritesResult(location: AddressedLocationWithOffices?) {
         location?.let {
             viewModelScope.launch {
-                setMarkers(location.offices)
+                setMarkers(location)
                 mLastLocation = location
                 checkCurrentLocationFavourite()
             }
@@ -103,7 +105,7 @@ class MapsViewModel @Inject constructor(
 
     private fun reMark() {
         mLastLocation.location?.let {
-            state.value = MapsFragmentState.SetMarkers(mLastLocation.offices)
+            state.value = MapsFragmentState.SetMarkers(mLastLocation)
         }
     }
 
@@ -123,8 +125,8 @@ class MapsViewModel @Inject constructor(
         state.value = MapsFragmentState.ShowTypeToast(error)
     }
 
-    private fun setMarkers(markers: List<Office?>) {
-        state.value = MapsFragmentState.SetMarkers(markers)
+    private fun setMarkers(location: AddressedLocationWithOffices) {
+        state.value = MapsFragmentState.SetMarkers(location)
     }
 
     private fun setFavourite(favourite: Boolean) {
@@ -141,7 +143,7 @@ sealed class MapsFragmentState {
     data class IsLoading(val isLoading : Boolean) : MapsFragmentState()
     data class ShowToast(val message : String) : MapsFragmentState()
     data class ShowTypeToast(val error : ErrorResponseType) : MapsFragmentState()
-    data class SetMarkers(val markers : List<Office?>) : MapsFragmentState()
+    data class SetMarkers(val location : AddressedLocationWithOffices) : MapsFragmentState()
     data class IsFavourite(val isFavourite : Boolean) : MapsFragmentState()
     object NavigateToFavourites : MapsFragmentState()
 }

@@ -8,10 +8,13 @@ import kotlinx.coroutines.flow.Flow
 interface AllDao {
     @Transaction
     @Query("SELECT DISTINCT * FROM touched_location_table WHERE location LIKE :loc")
-    fun getTouchedLocationWithOffices(loc: LatLng): Flow<List<LocationWithOffices>>
+    fun getTouchedLocationWithOffices(loc: LatLng): Flow<LocationWithOffices>
 
     @Query("SELECT DISTINCT * FROM location_office_cross_ref WHERE officeId LIKE :id")
     fun getCrossRefsForOffice(id: String): Flow<List<LocationOfficeCrossRef>>
+
+    @Query("SELECT DISTINCT * FROM location_office_cross_ref WHERE LocationId LIKE :id")
+    fun getCrossRefsForLocation(id: LatLng): Flow<List<LocationOfficeCrossRef>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertLocationOfficeCrossRef(locationOfficeCrossRef: LocationOfficeCrossRef)

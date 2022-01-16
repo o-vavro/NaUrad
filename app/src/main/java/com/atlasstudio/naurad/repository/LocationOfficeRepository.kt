@@ -14,7 +14,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -338,6 +337,27 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
         }
     }
 
+    suspend fun deleteLocation(location: TouchedLocation) {
+        location.location?.let {
+            locationDao.deleteTouchedLocation(it, location.address)
+            // delete all offices with only one ref equal to this touched location and the ref
+            allDao.getCrossRefsForLocation(it)
+                .collect { crossRefListLocation ->
+                    for (item in crossRefListLocation) {
+                        allDao.getCrossRefsForOffice(item.officeId)
+                            .collect { crossRefListOffice ->
+                                if (crossRefListOffice.size == 1) {
+                                    officeDao.getOffice(item.officeId)?.value?.let { office ->
+                                        officeDao.deleteOffice(office)
+                                    }
+
+                                }
+                            }
+                    }
+                }
+        }
+    }
+
     suspend fun isLocationStored(location: LatLng?): Flow<Boolean> = flow {
         location?.let {
             locationDao.getTouchedLocation(location)
@@ -346,5 +366,19 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
                 }
         }
         emit(false)
+    }
+
+    suspend fun getFavouriteLocations(): Flow<List<TouchedLocation>> = flow {
+        locationDao.getTouchedLocations()
+            .collect {
+                emit(it)
+            }
+    }
+
+    suspend fun getLocatedOfficesForFavourite(location: TouchedLocation) = flow {
+        allDao.getTouchedLocationWithOffices(location.location)
+            .collect {
+                emit(it)
+            }
     }
 }

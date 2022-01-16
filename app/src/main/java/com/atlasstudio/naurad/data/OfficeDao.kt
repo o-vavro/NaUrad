@@ -6,7 +6,7 @@ import androidx.room.*
 @Dao
 interface OfficeDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addOffice(office: Office?)
+    suspend fun addOffice(office: Office)
 
     @Query("SELECT DISTINCT * FROM office_table WHERE id LIKE :id")
     fun getOffice(id: String): LiveData<Office?>?
@@ -15,7 +15,7 @@ interface OfficeDao {
     fun getOffices(): LiveData<List<Office?>?>?
 
     @Delete
-    suspend fun deleteOffice(office: Office?)
+    suspend fun deleteOffice(office: Office)
 
     @Query("DELETE FROM office_table")
     suspend fun deleteAllOffices()
