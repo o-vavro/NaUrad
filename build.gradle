@@ -24,6 +24,7 @@ buildscript {
         ktxVersion = "1.7.0"
         lifecycleVersion = "2.4.0"
         gmsPlayServicesMapsVersion = "18.0.0"
+        gmsplayServicesLocationVersion = "19.0.1"
         easyPermissionsVersion = "3.0.0"
         protoBufferLiteVersion = "3.19.1"
 

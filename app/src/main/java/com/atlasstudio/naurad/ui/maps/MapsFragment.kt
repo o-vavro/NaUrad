@@ -8,7 +8,6 @@ import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.*
-import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
@@ -20,8 +19,8 @@ import com.atlasstudio.naurad.data.AddressedLocationWithOffices
 import com.atlasstudio.naurad.data.OfficeType
 import com.atlasstudio.naurad.databinding.FragmentMapsBinding
 import com.atlasstudio.naurad.net.utils.ErrorResponseType
-import com.atlasstudio.naurad.utils.onQueryTextChanged
 import com.atlasstudio.naurad.utils.showToast
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMap.*
@@ -83,6 +82,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         }
     }
 
+    @SuppressLint("MissingPermission")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.setOnMapClickListener(this)
@@ -100,10 +100,19 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
 
         enableCurrentLocation()
 
-        // Add a marker in Zlin and move the camera
         val zlin = LatLng(49.230505, 17.657103)
-        mMap.addMarker(MarkerOptions().position(viewModel.lastPosition ?: zlin))
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(viewModel.lastPosition ?: zlin, 14.5f))
+        var currentLocation: LatLng? = null
+        val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        if (mMap.isMyLocationEnabled) {
+            val locationResult = fusedLocationProviderClient.lastLocation
+            locationResult.addOnCompleteListener(requireActivity()) { task ->
+                if (task.isSuccessful) {
+                    // Set the map's camera position to the current location of the device.
+                    currentLocation = LatLng(task.result.latitude, task.result.longitude)
+                }
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(viewModel.lastPosition ?: (currentLocation ?: zlin), viewModel.lastZoom))
+            }
+        }
 
         observe()
         // re-place markers
@@ -137,6 +146,9 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
     override fun onCameraIdle() {
         if(!::mMap.isInitialized) return
         //mCameraTextView.text = mMap.cameraPosition.toString()
+        if(viewModel.lastZoom != mMap.cameraPosition.zoom) {
+            viewModel.onCameraZoomChanged(mMap.cameraPosition.zoom)
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -145,7 +157,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         if (hasLocationPermission() == true) {
             mMap.isMyLocationEnabled = true
         } else {
-            EasyPermissions.requestPermissions(this, getString(R.string.location_permissions),
+            val perms = EasyPermissions.requestPermissions(this, getString(R.string.location_permissions),
                 REQUEST_CODE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION
             )
         }
@@ -292,12 +304,12 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         inflater.inflate(R.menu.menu_fragment_maps, menu)
         mMenu = menu
 
-        val searchItem = menu.findItem(R.id.action_search)
+        /*val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
 
         searchView.onQueryTextChanged {
 
-        }
+        }*/
         viewModel.checkCurrentLocationFavourite()
 
         //val autoComplete = searchItem.actionView as SearchView.SearchAutoComplete
@@ -306,9 +318,9 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.action_search -> {
+            /*R.id.action_search -> {
                 true
-            }
+            }*/
             R.id.action_mark_favourite -> {
                 viewModel.lastPosition?.let {
                     if (!mBinding.progress.isShown) {
