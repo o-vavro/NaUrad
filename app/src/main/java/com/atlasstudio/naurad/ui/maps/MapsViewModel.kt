@@ -26,8 +26,8 @@ class MapsViewModel @Inject constructor(
 
     private var mLastLocation: AddressedLocationWithOffices = AddressedLocationWithOffices(null, "", emptyList())
     val lastPosition: LatLng? get() = mLastLocation.location
-    private var mLastZoom: Float = 14.5f
-    val lastZoom: Float get() = mLastZoom
+    /*private var mLastZoom: Float = 14.5f
+    val lastZoom: Float get() = mLastZoom*/
 
     fun onStart() {
         initialize()
@@ -101,9 +101,9 @@ class MapsViewModel @Inject constructor(
         }
     }
 
-    fun onCameraZoomChanged(cameraZoom: Float) {
+    /*fun onCameraZoomChanged(cameraZoom: Float) {
         mLastZoom = cameraZoom
-    }
+    }*/
 
     private fun initialize() {
         state.value = MapsFragmentState.Init
