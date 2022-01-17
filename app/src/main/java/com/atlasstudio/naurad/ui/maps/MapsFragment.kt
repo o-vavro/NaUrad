@@ -110,7 +110,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
                     // Set the map's camera position to the current location of the device.
                     currentLocation = LatLng(task.result.latitude, task.result.longitude)
                 }
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(viewModel.lastPosition ?: (currentLocation ?: zlin), viewModel.lastZoom))
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(viewModel.lastPosition ?: (currentLocation ?: zlin), /*viewModel.lastZoom*/14.5f))
             }
         }
 
@@ -146,9 +146,9 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
     override fun onCameraIdle() {
         if(!::mMap.isInitialized) return
         //mCameraTextView.text = mMap.cameraPosition.toString()
-        if(viewModel.lastZoom != mMap.cameraPosition.zoom) {
+        /*if(viewModel.lastZoom != mMap.cameraPosition.zoom) {
             viewModel.onCameraZoomChanged(mMap.cameraPosition.zoom)
-        }
+        }*/
     }
 
     @SuppressLint("MissingPermission")
@@ -237,19 +237,19 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
                         .title(marker.name)
                         .icon(when(marker.type) { // this should not be here!!!
                             OfficeType.CityGovernmentOffice ->
-                                    generateSmallIcon(context!!, R.drawable.ic_city_office_marker)
+                                    generateSmallIcon(context!!, R.drawable.ic_city_office)
                                 OfficeType.LabourOffice ->
-                                    generateSmallIcon(context!!, R.drawable.ic_labour_office_marker)
+                                    generateSmallIcon(context!!, R.drawable.ic_labour_office)
                                 OfficeType.TaxOffice ->
-                                    generateSmallIcon(context!!, R.drawable.ic_tax_office_marker)
+                                    generateSmallIcon(context!!, R.drawable.ic_tax_office)
                                 OfficeType.CustomsOffice ->
-                                    generateSmallIcon(context!!, R.drawable.ic_customs_office_marker)
+                                    generateSmallIcon(context!!, R.drawable.ic_customs_office)
                                 OfficeType.HighCourt ->
-                                    generateSmallIcon(context!!, R.drawable.ic_high_court_marker)
+                                    generateSmallIcon(context!!, R.drawable.ic_high_court)
                                 OfficeType.RegionalCourt ->
-                                    generateSmallIcon(context!!, R.drawable.ic_regional_court_marker)
+                                    generateSmallIcon(context!!, R.drawable.ic_regional_court)
                                 OfficeType.DistrictCourt ->
-                                    generateSmallIcon(context!!, R.drawable.ic_district_court_marker)
+                                    generateSmallIcon(context!!, R.drawable.ic_district_court)
                         }))
                 mCurrentMarkers.add(mark)
             }
