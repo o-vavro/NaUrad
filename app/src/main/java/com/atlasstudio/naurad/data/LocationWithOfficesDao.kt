@@ -5,7 +5,7 @@ import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface AllDao {
+interface LocationWithOfficesDao {
     @Transaction
     @Query("SELECT DISTINCT * FROM touched_location_table WHERE location LIKE :loc")
     fun getTouchedLocationWithOffices(loc: LatLng): Flow<LocationWithOffices>

@@ -3,7 +3,8 @@ package com.atlasstudio.naurad.ui.maps
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.atlasstudio.naurad.data.AddressedLocationWithOffices
+import com.atlasstudio.naurad.data.LocationWithOffices
+import com.atlasstudio.naurad.data.TouchedLocation
 import com.atlasstudio.naurad.net.utils.ErrorResponseType
 import com.atlasstudio.naurad.repository.LocationOfficeRepository
 import com.atlasstudio.naurad.utils.BaseResult
@@ -24,8 +25,14 @@ class MapsViewModel @Inject constructor(
     private val state = MutableStateFlow<MapsFragmentState>(MapsFragmentState.Init)
     val mState: StateFlow<MapsFragmentState> get() = state
 
-    private var mLastLocation: AddressedLocationWithOffices = AddressedLocationWithOffices(null, "", emptyList())
-    val lastPosition: LatLng? get() = mLastLocation.location
+    private var mLastLocation: LocationWithOffices = LocationWithOffices(
+        TouchedLocation(
+            LatLng(0.0, 0.0),
+            ""
+        ),
+        emptyList()
+    )
+    val lastPosition: LatLng? get() = mLastLocation.location.location
     /*private var mLastZoom: Float = 14.5f
     val lastZoom: Float get() = mLastZoom*/
 
@@ -37,8 +44,8 @@ class MapsViewModel @Inject constructor(
         reMark()
     }
 
-    fun onPositionSelected(pos: LatLng?) {
-        mLastLocation = AddressedLocationWithOffices(pos, "", emptyList())
+    fun onPositionSelected(pos: LatLng) {
+        mLastLocation = LocationWithOffices(TouchedLocation(pos, ""), emptyList())
         pos?.let {
             viewModelScope.launch {
                 repo.getLocatedOfficesForLocation(pos)
@@ -84,14 +91,14 @@ class MapsViewModel @Inject constructor(
 
     fun checkCurrentLocationFavourite() {
         viewModelScope.launch {
-            repo.isLocationStored(mLastLocation.location)
+            repo.isLocationStored(mLastLocation.location.location)
                 .collect {
                     setFavourite(it)
                 }
         }
     }
 
-    fun onFavouritesResult(location: AddressedLocationWithOffices?) {
+    fun onFavouritesResult(location: LocationWithOffices?) {
         location?.let {
             viewModelScope.launch {
                 setMarkers(location)
@@ -131,7 +138,7 @@ class MapsViewModel @Inject constructor(
         state.value = MapsFragmentState.ShowTypeToast(error)
     }
 
-    private fun setMarkers(location: AddressedLocationWithOffices) {
+    private fun setMarkers(location: LocationWithOffices) {
         state.value = MapsFragmentState.SetMarkers(location)
     }
 
@@ -149,7 +156,7 @@ sealed class MapsFragmentState {
     data class IsLoading(val isLoading : Boolean) : MapsFragmentState()
     data class ShowToast(val message : String) : MapsFragmentState()
     data class ShowTypeToast(val error : ErrorResponseType) : MapsFragmentState()
-    data class SetMarkers(val location : AddressedLocationWithOffices) : MapsFragmentState()
+    data class SetMarkers(val location : LocationWithOffices) : MapsFragmentState()
     data class IsFavourite(val isFavourite : Boolean) : MapsFragmentState()
     object NavigateToFavourites : MapsFragmentState()
 }

@@ -21,7 +21,7 @@ import javax.inject.Singleton
 @Singleton
 class LocationOfficeRepository @Inject constructor(private val officeDao: OfficeDao,
                                                    private val locationDao: TouchedLocationDao,
-                                                   private val allDao: AllDao,
+                                                   private val locationWithOfficesDao: LocationWithOfficesDao,
                                                    private val epsgService: EpsgService,
                                                    private val ruianService: RuianService,
                                                    private val apiTalksService: ApiTalksService) {
@@ -218,7 +218,7 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
         }
     }
 
-    suspend fun getLocatedOfficesForLocation(loc: LatLng) : Flow<BaseResult<AddressedLocationWithOffices, ErrorResponseType>> {
+    suspend fun getLocatedOfficesForLocation(loc: LatLng) : Flow<BaseResult<LocationWithOffices, ErrorResponseType>> {
         return flow {
             //val databaseResult = allDao.getTouchedLocationWithOffices(loc)
 
@@ -260,29 +260,35 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
 
                         val officeResponse = apiTalksService.idToOffice(officeId)
                         if(officeResponse.isSuccessful) {
-                            var offices = officeResponse.body()!!.toOffices()
+                            var officesNulled = officeResponse.body()!!.toOffices()
+                            var offices : MutableList<Office> = mutableListOf()
 
-                            for(i in offices.indices) {
-                                val officeLocationResponse = ruianService.addressToLocation(offices[i]!!.address)
+                            for(office in officesNulled) {
+                                office?.let {
+                                    val officeLocationResponse =
+                                        ruianService.addressToLocation(office.address)
 
-                                if(officeLocationResponse.isSuccessful) {
-                                    val loc = officeLocationResponse.body()!!.candidates[0].location
+                                    if (officeLocationResponse.isSuccessful) {
+                                        val loc =
+                                            officeLocationResponse.body()!!.candidates[0].location
 
-                                    val officeGPSLocResponse = epsgService.convertJTSKtoGPS(loc!!.x, loc!!.y)
+                                        val officeGPSLocResponse =
+                                            epsgService.convertJTSKtoGPS(loc!!.x, loc!!.y)
 
-                                    if(officeGPSLocResponse.isSuccessful) {
-                                        val officeGPSLoc = officeGPSLocResponse.body()
-                                        offices[i]?.location = LatLng(officeGPSLoc!!.y!!.toDouble(),
-                                                                      officeGPSLoc!!.x!!.toDouble())
+                                        if (officeGPSLocResponse.isSuccessful) {
+                                            val officeGPSLoc = officeGPSLocResponse.body()
+                                            office.location = LatLng(officeGPSLoc!!.y!!.toDouble(), officeGPSLoc!!.x!!.toDouble())
+                                            offices.add(office)
+                                        } else {
+                                            emit(BaseResult.Error(ErrorResponseType.LocationForOfficeError))
+                                        }
                                     } else {
-                                        emit(BaseResult.Error(ErrorResponseType.LocationForOfficeError))
+                                        emit(BaseResult.Error(ErrorResponseType.AddressForOfficeError))
                                     }
-                                } else {
-                                    emit(BaseResult.Error(ErrorResponseType.AddressForOfficeError))
                                 }
                             }
 
-                            emit(BaseResult.Success(AddressedLocationWithOffices(loc, ruianAddress, offices)))
+                            emit(BaseResult.Success(LocationWithOffices(TouchedLocation(loc, ruianAddress), offices)))
                         }
                         else {
                             emit(BaseResult.Error(ErrorResponseType.OfficesNotFoundError))
@@ -300,17 +306,15 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
         }
     }
 
-    suspend fun storeLocation(location: AddressedLocationWithOffices) {
+    suspend fun storeLocation(location: LocationWithOffices) {
         location.location?.let {
-            val touchedLocation =
-                TouchedLocation(location = it, address = location.address)
-            locationDao.addTouchedLocation(touchedLocation)
+            locationDao.addTouchedLocation(it)
             for (office in location.offices) {
                 office?.let { office ->
                     officeDao.addOffice(office)
-                    allDao.insertLocationOfficeCrossRef(
+                    locationWithOfficesDao.insertLocationOfficeCrossRef(
                         LocationOfficeCrossRef(
-                            touchedLocation.location,
+                            it.location,
                             office.id
                         )
                     )
@@ -319,19 +323,19 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
         }
     }
 
-    suspend fun deleteLocation(location: AddressedLocationWithOffices) {
+    suspend fun deleteLocation(location: LocationWithOffices) {
         location.location?.let {
-            locationDao.deleteTouchedLocation(it, location.address)
+            locationDao.deleteTouchedLocation(it.location, it.address)
             // delete all offices with only one ref equal to this touched location and the ref
             for (office in location.offices) {
                 office?.let {
-                    allDao.getCrossRefsForOffice(office.id)
+                    locationWithOfficesDao.getCrossRefsForOffice(office.id)
                         .collect { crossRefList ->
                             if (crossRefList.size == 1) {
                                 officeDao.deleteOffice(office)
                             }
                         }
-                    allDao.deleteLocationOfficeCrossRef(location.location, office.id)
+                    locationWithOfficesDao.deleteLocationOfficeCrossRef(it.location, office.id)
                 }
             }
         }
@@ -341,10 +345,10 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
         location.location?.let {
             locationDao.deleteTouchedLocation(it, location.address)
             // delete all offices with only one ref equal to this touched location and the ref
-            allDao.getCrossRefsForLocation(it)
+            locationWithOfficesDao.getCrossRefsForLocation(it)
                 .collect { crossRefListLocation ->
                     for (item in crossRefListLocation) {
-                        allDao.getCrossRefsForOffice(item.officeId)
+                        locationWithOfficesDao.getCrossRefsForOffice(item.officeId)
                             .collect { crossRefListOffice ->
                                 if (crossRefListOffice.size == 1) {
                                     officeDao.getOffice(item.officeId)?.value?.let { office ->
@@ -376,7 +380,7 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
     }
 
     suspend fun getLocatedOfficesForFavourite(location: TouchedLocation) = flow {
-        allDao.getTouchedLocationWithOffices(location.location)
+        locationWithOfficesDao.getTouchedLocationWithOffices(location.location)
             .collect {
                 emit(it)
             }

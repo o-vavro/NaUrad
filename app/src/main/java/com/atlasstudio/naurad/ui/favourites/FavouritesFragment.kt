@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.atlasstudio.naurad.R
-import com.atlasstudio.naurad.data.AddressedLocationWithOffices
+import com.atlasstudio.naurad.data.LocationWithOffices
 import com.atlasstudio.naurad.data.TouchedLocation
 import com.atlasstudio.naurad.databinding.FragmentFavouritesBinding
 import com.atlasstudio.naurad.utils.showToast
@@ -101,7 +101,7 @@ class FavouritesFragment : Fragment(R.layout.fragment_favourites), FavouritesAda
         viewModel.onFavouriteDelete(favourite)
     }
 
-    private fun handleNavigateBack(location: AddressedLocationWithOffices) {
+    private fun handleNavigateBack(location: LocationWithOffices) {
         mBinding.recyclerViewFavourites.clearFocus()
         setFragmentResult(
             "favourites_request",

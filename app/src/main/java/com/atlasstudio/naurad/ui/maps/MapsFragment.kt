@@ -15,7 +15,7 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.atlasstudio.naurad.R
-import com.atlasstudio.naurad.data.AddressedLocationWithOffices
+import com.atlasstudio.naurad.data.LocationWithOffices
 import com.atlasstudio.naurad.data.OfficeType
 import com.atlasstudio.naurad.databinding.FragmentMapsBinding
 import com.atlasstudio.naurad.net.utils.ErrorResponseType
@@ -77,7 +77,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         setHasOptionsMenu(true)
 
         setFragmentResultListener("favourites_request") { _, bundle ->
-            val result = bundle.getParcelable<AddressedLocationWithOffices>("favourites_result")
+            val result = bundle.getParcelable<LocationWithOffices>("favourites_result")
             viewModel.onFavouritesResult(result)
         }
     }
@@ -220,7 +220,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         }
     }
 
-    private fun handleMarkers(location: AddressedLocationWithOffices) {
+    private fun handleMarkers(location: LocationWithOffices) {
         /*for(marker in mCurrentMarkers) {
             marker?.remove()
         }*/
@@ -261,10 +261,10 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         // add selected location marker
         location.location?.let {
             val mark = mMap.addMarker(MarkerOptions()
-                .position(it)
-                .title(location.address))
+                .position(it.location)
+                .title(location.location.address))
             mCurrentMarkers.add(mark)
-            cameraBounds.include(it)
+            cameraBounds.include(it.location)
         }
 
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(cameraBounds.build(), 50))

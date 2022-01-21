@@ -2,7 +2,7 @@ package com.atlasstudio.naurad.ui.favourites
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.atlasstudio.naurad.data.AddressedLocationWithOffices
+import com.atlasstudio.naurad.data.LocationWithOffices
 import com.atlasstudio.naurad.data.TouchedLocation
 import com.atlasstudio.naurad.repository.LocationOfficeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,7 +31,7 @@ class FavouritesViewModel @Inject constructor(
         viewModelScope.launch {
             repo.getLocatedOfficesForFavourite(location)
                 .collect {
-                    navigateBack(AddressedLocationWithOffices(it.location.location, it.location.address, it.offices))
+                    navigateBack(LocationWithOffices(it.location, it.offices))
                 }
         }
     }
@@ -47,7 +47,7 @@ class FavouritesViewModel @Inject constructor(
         state.value = FavouritesFragmentState.Init
     }
 
-    private fun navigateBack(location : AddressedLocationWithOffices) {
+    private fun navigateBack(location : LocationWithOffices) {
         state.value = FavouritesFragmentState.NavigateBackWithResult(location)
     }
 
@@ -58,6 +58,6 @@ class FavouritesViewModel @Inject constructor(
 
 sealed class FavouritesFragmentState {
     object Init : FavouritesFragmentState()
-    data class NavigateBackWithResult(val location : AddressedLocationWithOffices) : FavouritesFragmentState()
+    data class NavigateBackWithResult(val location : LocationWithOffices) : FavouritesFragmentState()
     object SnackBarFavouriteDeleted: FavouritesFragmentState()
 }

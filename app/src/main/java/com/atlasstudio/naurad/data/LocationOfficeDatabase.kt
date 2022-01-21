@@ -14,7 +14,7 @@ import javax.inject.Provider
 abstract class LocationOfficeDatabase: RoomDatabase() {
     abstract fun officeDao(): OfficeDao
     abstract fun locationDao(): TouchedLocationDao
-    abstract fun allDao(): AllDao
+    abstract fun allDao(): LocationWithOfficesDao
 
     class Callback @Inject constructor(
         private val databaseLocation: Provider<LocationOfficeDatabase>,
