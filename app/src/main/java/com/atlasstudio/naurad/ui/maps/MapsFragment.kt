@@ -8,6 +8,7 @@ import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
@@ -33,8 +34,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
-
-
 
 
 const val REQUEST_CODE_LOCATION = 42   // just a random unique number
@@ -157,7 +156,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         if (hasLocationPermission() == true) {
             mMap.isMyLocationEnabled = true
         } else {
-            val perms = EasyPermissions.requestPermissions(this, getString(R.string.location_permissions),
+            EasyPermissions.requestPermissions(this, getString(R.string.location_permissions),
                 REQUEST_CODE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION
             )
         }
