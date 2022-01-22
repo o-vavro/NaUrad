@@ -220,17 +220,16 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         }
     }
 
-    private fun handleMarkers(location: LocationWithOffices) {
+    private fun handleMarkers(lwo: LocationWithOffices) {
         /*for(marker in mCurrentMarkers) {
             marker?.remove()
         }*/
         mCurrentMarkers.clear()
         mMap.clear()
 
-        var cameraBounds: LatLngBounds.Builder = LatLngBounds.builder()
+        val cameraBounds: LatLngBounds.Builder = LatLngBounds.builder()
         // add office markers
-        for( marker in location.offices) {
-            marker?.let { marker ->
+        for( marker in lwo.offices) {
                 val mark = mMap.addMarker(
                     MarkerOptions()
                         .position(marker.location)
@@ -252,28 +251,23 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
                                     generateSmallIcon(context!!, R.drawable.ic_district_court)
                         }))
                 mCurrentMarkers.add(mark)
-            }
-            marker?.location?.let {
-                cameraBounds.include(it)
-            }
+                cameraBounds.include(marker.location)
         }
 
         // add selected location marker
-        location.location?.let {
             val mark = mMap.addMarker(MarkerOptions()
-                .position(it.location)
-                .title(location.location.address))
+                .position(lwo.location.location)
+                .title(lwo.location.address))
             mCurrentMarkers.add(mark)
-            cameraBounds.include(it.location)
-        }
+            cameraBounds.include(lwo.location.location)
 
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(cameraBounds.build(), 50))
     }
 
     private fun handleFavourite(favourite: Boolean) {
-        var favouriteMark = mMenu.findItem(R.id.action_mark_favourite)
+        val favouriteMark = mMenu.findItem(R.id.action_mark_favourite)
         favouriteMark.isChecked = favourite
-        favouriteMark.icon = context?.getDrawable(if (favouriteMark.isChecked) R.drawable.ic_star else R.drawable.ic_star_border)
+        favouriteMark.icon = AppCompatResources.getDrawable(context!!, if (favouriteMark.isChecked) R.drawable.ic_star else R.drawable.ic_star_border)
     }
 
     private fun handleShowFavourites() {
@@ -282,7 +276,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
     }
 
     private fun generateSmallIcon(context: Context, resource: Int): BitmapDescriptor {
-        val drawable = context.getDrawable(resource)
+        val drawable = AppCompatResources.getDrawable(context, resource)
 
         if (drawable is BitmapDrawable) {
             return BitmapDescriptorFactory.fromBitmap(drawable.bitmap)
@@ -326,10 +320,10 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
                     if (!mBinding.progress.isShown) {
                         item.isChecked = !item.isChecked
                         if (item.isChecked) {
-                            item.icon = context?.getDrawable(R.drawable.ic_star)
+                            item.icon = AppCompatResources.getDrawable(context!!, R.drawable.ic_star)
                             viewModel.storeCurrentLocation()
                         } else {
-                            item.icon = context?.getDrawable(R.drawable.ic_star_border)
+                            item.icon = AppCompatResources.getDrawable(context!!, R.drawable.ic_star_border)
                             viewModel.deleteCurrentLocation()
                         }
                     }
