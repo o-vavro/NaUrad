@@ -5,7 +5,7 @@ import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface EpsgService {
+interface CoordinateTranslationService {
     @GET("trans")
     suspend fun convertLocation(@Query("x") lng: String, @Query("y") lat: String, @Query("s_srs") sourceType: Int, @Query("t_srs") targetType: Int) : Response<EpsgResponse>
 

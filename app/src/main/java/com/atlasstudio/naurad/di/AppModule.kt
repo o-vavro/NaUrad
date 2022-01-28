@@ -5,7 +5,7 @@ import androidx.room.Room
 import com.atlasstudio.naurad.BuildConfig
 import com.atlasstudio.naurad.data.LocationOfficeDatabase
 import com.atlasstudio.naurad.net.service.ApiTalksService
-import com.atlasstudio.naurad.net.service.EpsgService
+import com.atlasstudio.naurad.net.service.CoordinateTranslationService
 import com.atlasstudio.naurad.net.service.RuianService
 import com.atlasstudio.naurad.utils.SingleToArrayTypeAdapter
 import com.google.gson.GsonBuilder
@@ -76,8 +76,8 @@ object AppModule {
 
     @Singleton
     @Provides
-    @Named("EpsgRetrofit")
-    fun provideEpsgRetrofit(okHttpClient: OkHttpClient): Retrofit = Retrofit.Builder()
+    @Named("CoordinateTranslationRetrofit")
+    fun provideCoordinateTranslationRetrofit(okHttpClient: OkHttpClient): Retrofit = Retrofit.Builder()
         .addConverterFactory(GsonConverterFactory.create())
         .baseUrl("https://epsg.io/")
         .client(okHttpClient)
@@ -85,7 +85,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideEpsgService(@Named("EpsgRetrofit") epsgRetrofit: Retrofit) = epsgRetrofit.create(EpsgService::class.java)
+    fun provideCoordinateTranslationService(@Named("CoordinateTranslationRetrofit") coordinateTranslationRetrofit: Retrofit) = coordinateTranslationRetrofit.create(CoordinateTranslationService::class.java)
 
     @Singleton
     @Provides

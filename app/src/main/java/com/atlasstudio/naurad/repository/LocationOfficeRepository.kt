@@ -5,7 +5,7 @@ import com.atlasstudio.naurad.net.model.OfficeIdResponse
 import com.atlasstudio.naurad.net.model.OfficeResponse
 import com.atlasstudio.naurad.net.model.RuianAddressResponse
 import com.atlasstudio.naurad.net.service.ApiTalksService
-import com.atlasstudio.naurad.net.service.EpsgService
+import com.atlasstudio.naurad.net.service.CoordinateTranslationService
 import com.atlasstudio.naurad.net.service.RuianService
 import com.atlasstudio.naurad.net.utils.ErrorResponseType
 import com.atlasstudio.naurad.utils.BaseResult
@@ -22,13 +22,13 @@ import javax.inject.Singleton
 class LocationOfficeRepository @Inject constructor(private val officeDao: OfficeDao,
                                                    private val locationDao: TouchedLocationDao,
                                                    private val locationWithOfficesDao: LocationWithOfficesDao,
-                                                   private val epsgService: EpsgService,
+                                                   private val coordinateTranslationService: CoordinateTranslationService,
                                                    private val ruianService: RuianService,
                                                    private val apiTalksService: ApiTalksService) {
 
     suspend fun getJTSKLocation(loc: LatLng): Flow<BaseResult<List<Double>, WrappedListResponse<EpsgResponse>>> {
         return flow {
-            val response = epsgService.convertGPStoJTSK(loc.longitude, loc.latitude)
+            val response = coordinateTranslationService.convertGPStoJTSK(loc.longitude, loc.latitude)
 
             if (response.isSuccessful) {
                 val body = response.body()!!
@@ -46,7 +46,7 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
 
     suspend fun getAddressForLocation(loc: LatLng): Flow<BaseResult<String, WrappedListResponse<RuianAddressResponse>>> {
         return flow {
-            val epsgResponse = epsgService.convertGPStoJTSK(loc.longitude, loc.latitude)
+            val epsgResponse = coordinateTranslationService.convertGPStoJTSK(loc.longitude, loc.latitude)
 
             if (epsgResponse.isSuccessful) {
                 val epsgBody = epsgResponse.body()!!
@@ -76,7 +76,7 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
 
     suspend fun getApiTalksForLocation(loc: LatLng) : Flow<BaseResult<String, WrappedListResponse<OfficeIdResponse>>> {
         return flow {
-            val epsgResponse = epsgService.convertGPStoJTSK(loc.longitude, loc.latitude)
+            val epsgResponse = coordinateTranslationService.convertGPStoJTSK(loc.longitude, loc.latitude)
 
             if (epsgResponse.isSuccessful) {
                 val epsgBody = epsgResponse.body()!!
@@ -142,7 +142,7 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
 
     suspend fun getOfficesForLocation(loc: LatLng) : Flow<BaseResult<List<Office?>, WrappedListResponse<OfficeResponse>>> {
         return flow {
-            val epsgResponse = epsgService.convertGPStoJTSK(loc.longitude, loc.latitude)
+            val epsgResponse = coordinateTranslationService.convertGPStoJTSK(loc.longitude, loc.latitude)
 
             if (epsgResponse.isSuccessful) {
                 val epsgBody = epsgResponse.body()!!
@@ -222,7 +222,7 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
         return flow {
             //val databaseResult = allDao.getTouchedLocationWithOffices(loc)
 
-            val epsgResponse = epsgService.convertGPStoJTSK(loc.longitude, loc.latitude)
+            val epsgResponse = coordinateTranslationService.convertGPStoJTSK(loc.longitude, loc.latitude)
 
             if (epsgResponse.isSuccessful) {
                 val epsgBody = epsgResponse.body()!!
@@ -273,7 +273,7 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
                                             officeLocationResponse.body()!!.candidates[0].location
 
                                         val officeGPSLocResponse =
-                                            epsgService.convertJTSKtoGPS(loc!!.x, loc!!.y)
+                                            coordinateTranslationService.convertJTSKtoGPS(loc!!.x, loc!!.y)
 
                                         if (officeGPSLocResponse.isSuccessful) {
                                             val officeGPSLoc = officeGPSLocResponse.body()
