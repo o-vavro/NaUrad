@@ -79,7 +79,7 @@ object AppModule {
     @Named("CoordinateTranslationRetrofit")
     fun provideCoordinateTranslationRetrofit(okHttpClient: OkHttpClient): Retrofit = Retrofit.Builder()
         .addConverterFactory(GsonConverterFactory.create())
-        .baseUrl("https://epsg.io/")
+        .baseUrl("https://geoportal.cuzk.cz/")
         .client(okHttpClient)
         .build()
 

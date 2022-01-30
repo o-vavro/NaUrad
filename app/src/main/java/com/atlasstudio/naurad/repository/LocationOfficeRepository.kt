@@ -1,12 +1,10 @@
 package com.atlasstudio.naurad.repository
 import com.atlasstudio.naurad.data.*
-import com.atlasstudio.naurad.net.model.EpsgResponse
+import com.atlasstudio.naurad.net.model.CoordinateTranslationResponse
 import com.atlasstudio.naurad.net.model.OfficeIdResponse
 import com.atlasstudio.naurad.net.model.OfficeResponse
 import com.atlasstudio.naurad.net.model.RuianAddressResponse
-import com.atlasstudio.naurad.net.service.ApiTalksService
-import com.atlasstudio.naurad.net.service.CoordinateTranslationService
-import com.atlasstudio.naurad.net.service.RuianService
+import com.atlasstudio.naurad.net.service.*
 import com.atlasstudio.naurad.net.utils.ErrorResponseType
 import com.atlasstudio.naurad.utils.BaseResult
 import com.atlasstudio.naurad.utils.WrappedListResponse
@@ -15,6 +13,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,16 +26,20 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
                                                    private val ruianService: RuianService,
                                                    private val apiTalksService: ApiTalksService) {
 
-    suspend fun getJTSKLocation(loc: LatLng): Flow<BaseResult<List<Double>, WrappedListResponse<EpsgResponse>>> {
+    suspend fun getJTSKLocation(loc: LatLng): Flow<BaseResult<List<Double>, WrappedListResponse<CoordinateTranslationResponse>>> {
         return flow {
-            val response = coordinateTranslationService.convertGPStoJTSK(loc.longitude, loc.latitude)
+            val response = coordinateTranslationService.convertLocationGPSToJTSK(
+                "${loc.longitude}+${loc.latitude}+0",
+                SimpleDateFormat("yyyy-MM-dd").format(Date())
+            )
 
             if (response.isSuccessful) {
                 val body = response.body()!!
-                emit(BaseResult.Success(listOf(body.x!!.toDouble(), body.y!!.toDouble(), body.z!!.toDouble())))
+                val bodyParts = body.coords!!.split(" ")
+                emit(BaseResult.Success(listOf(bodyParts[0]!!.toDouble(), bodyParts[1]!!.toDouble(), bodyParts[2]!!.toDouble())))
             } else {
-                val type = object : TypeToken<WrappedListResponse<EpsgResponse>>() {}.type
-                val err = Gson().fromJson<WrappedListResponse<EpsgResponse>>(
+                val type = object : TypeToken<WrappedListResponse<CoordinateTranslationResponse>>() {}.type
+                val err = Gson().fromJson<WrappedListResponse<CoordinateTranslationResponse>>(
                     response.errorBody()!!.charStream(), type
                 )!!
                 err.code = response.code()
@@ -46,29 +50,33 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
 
     suspend fun getAddressForLocation(loc: LatLng): Flow<BaseResult<String, WrappedListResponse<RuianAddressResponse>>> {
         return flow {
-            val epsgResponse = coordinateTranslationService.convertGPStoJTSK(loc.longitude, loc.latitude)
+            val coordinateTranslationResponse = coordinateTranslationService.convertLocationGPSToJTSK(
+                "${loc.longitude}+${loc.latitude}+0",
+                SimpleDateFormat("yyyy-MM-dd").format(Date())
+            )
 
-            if (epsgResponse.isSuccessful) {
-                val epsgBody = epsgResponse.body()!!
+            if (coordinateTranslationResponse.isSuccessful) {
+                val body = coordinateTranslationResponse.body()!!
+                val bodyParts = body.coords!!.split(" ")
 
-                val ruianResponse = ruianService.locationToAddress(JTSKLocation(epsgBody.x!!, epsgBody.y!!))
+                val ruianResponse = ruianService.locationToAddress(JTSKLocation(bodyParts[0]!!, bodyParts[1]!!))
                 if(ruianResponse.isSuccessful) {
                     val ruianBody = ruianResponse.body()!!
                     emit(BaseResult.Success(ruianBody.address!!.address!!))
                 } else {
                     val type = object : TypeToken<WrappedListResponse<RuianAddressResponse>>() {}.type
                     val err = Gson().fromJson<WrappedListResponse<RuianAddressResponse>>(
-                        epsgResponse.errorBody()!!.charStream(), type
+                        coordinateTranslationResponse.errorBody()!!.charStream(), type
                     )!!
                     err.code = ruianResponse.code()
                     emit(BaseResult.Error(err))
                 }
             } else {
-                val type = object : TypeToken<WrappedListResponse<EpsgResponse>>() {}.type
+                val type = object : TypeToken<WrappedListResponse<CoordinateTranslationResponse>>() {}.type
                 val err = Gson().fromJson<WrappedListResponse<RuianAddressResponse>>(
-                    epsgResponse.errorBody()!!.charStream(), type
+                    coordinateTranslationResponse.errorBody()!!.charStream(), type
                 )!!
-                err.code = epsgResponse.code()
+                err.code = coordinateTranslationResponse.code()
                 emit(BaseResult.Error(err))
             }
         }
@@ -76,12 +84,16 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
 
     suspend fun getApiTalksForLocation(loc: LatLng) : Flow<BaseResult<String, WrappedListResponse<OfficeIdResponse>>> {
         return flow {
-            val epsgResponse = coordinateTranslationService.convertGPStoJTSK(loc.longitude, loc.latitude)
+            val coordinateTranslationResponse = coordinateTranslationService.convertLocationGPSToJTSK(
+                "${loc.longitude}+${loc.latitude}+0",
+                SimpleDateFormat("yyyy-MM-dd").format(Date())
+            )
 
-            if (epsgResponse.isSuccessful) {
-                val epsgBody = epsgResponse.body()!!
+            if (coordinateTranslationResponse.isSuccessful) {
+                val body = coordinateTranslationResponse.body()!!
+                val bodyParts = body.coords!!.split(" ")
 
-                val ruianResponse = ruianService.locationToAddress(JTSKLocation(epsgBody.x!!, epsgBody.y!!))
+                val ruianResponse = ruianService.locationToAddress(JTSKLocation(bodyParts[0]!!, bodyParts[1]!!))
                 if(ruianResponse.isSuccessful) {
                     val ruianAddress = ruianResponse.body()!!.address!!.address
 
@@ -116,7 +128,7 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
                     else {
                         val type = object : TypeToken<WrappedListResponse<OfficeIdResponse>>() {}.type
                         val err = Gson().fromJson<WrappedListResponse<OfficeIdResponse>>(
-                            epsgResponse.errorBody()!!.charStream(), type
+                            coordinateTranslationResponse.errorBody()!!.charStream(), type
                         )!!
                         err.code = officeIdResponse.code()
                         emit(BaseResult.Error(err))
@@ -124,17 +136,17 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
                 } else {
                     val type = object : TypeToken<WrappedListResponse<RuianAddressResponse>>() {}.type
                     val err = Gson().fromJson<WrappedListResponse<OfficeIdResponse>>(
-                        epsgResponse.errorBody()!!.charStream(), type
+                        coordinateTranslationResponse.errorBody()!!.charStream(), type
                     )!!
                     err.code = ruianResponse.code()
                     emit(BaseResult.Error(err))
                 }
             } else {
-                val type = object : TypeToken<WrappedListResponse<EpsgResponse>>() {}.type
+                val type = object : TypeToken<WrappedListResponse<CoordinateTranslationResponse>>() {}.type
                 val err = Gson().fromJson<WrappedListResponse<OfficeIdResponse>>(
-                    epsgResponse.errorBody()!!.charStream(), type
+                    coordinateTranslationResponse.errorBody()!!.charStream(), type
                 )!!
-                err.code = epsgResponse.code()
+                err.code = coordinateTranslationResponse.code()
                 emit(BaseResult.Error(err))
             }
         }
@@ -142,12 +154,16 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
 
     suspend fun getOfficesForLocation(loc: LatLng) : Flow<BaseResult<List<Office?>, WrappedListResponse<OfficeResponse>>> {
         return flow {
-            val epsgResponse = coordinateTranslationService.convertGPStoJTSK(loc.longitude, loc.latitude)
+            val coordinateTranslationResponse = coordinateTranslationService.convertLocationGPSToJTSK(
+                "${loc.longitude}+${loc.latitude}+0",
+                SimpleDateFormat("yyyy-MM-dd").format(Date())
+            )
 
-            if (epsgResponse.isSuccessful) {
-                val epsgBody = epsgResponse.body()!!
+            if (coordinateTranslationResponse.isSuccessful) {
+                val body = coordinateTranslationResponse.body()!!
+                val bodyParts = body.coords!!.split(" ")
 
-                val ruianResponse = ruianService.locationToAddress(JTSKLocation(epsgBody.x!!, epsgBody.y!!))
+                val ruianResponse = ruianService.locationToAddress(JTSKLocation(bodyParts[0]!!, bodyParts[1]!!))
                 if(ruianResponse.isSuccessful) {
                     val ruianAddress = ruianResponse.body()!!.address!!.address
 
@@ -208,11 +224,11 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
                     emit(BaseResult.Error(err))
                 }
             } else {
-                val type = object : TypeToken<WrappedListResponse<EpsgResponse>>() {}.type
+                val type = object : TypeToken<WrappedListResponse<CoordinateTranslationResponse>>() {}.type
                 val err = Gson().fromJson<WrappedListResponse<OfficeResponse>>(
-                    epsgResponse.errorBody()!!.charStream(), type
+                    coordinateTranslationResponse.errorBody()!!.charStream(), type
                 )!!
-                err.code = epsgResponse.code()
+                err.code = coordinateTranslationResponse.code()
                 emit(BaseResult.Error(err))
             }
         }
@@ -222,12 +238,16 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
         return flow {
             //val databaseResult = allDao.getTouchedLocationWithOffices(loc)
 
-            val epsgResponse = coordinateTranslationService.convertGPStoJTSK(loc.longitude, loc.latitude)
+            val coordinateTranslationResponse = coordinateTranslationService.convertLocationGPSToJTSK(
+                "${loc.longitude}+${loc.latitude}+0",
+                SimpleDateFormat("yyyy-MM-dd").format(Date())
+            )
 
-            if (epsgResponse.isSuccessful) {
-                val epsgBody = epsgResponse.body()!!
+            if (coordinateTranslationResponse.isSuccessful) {
+                val body = coordinateTranslationResponse.body()!!
+                val bodyParts = body.coords!!.split(" ")
 
-                val ruianResponse = ruianService.locationToAddress(JTSKLocation(epsgBody.x!!, epsgBody.y!!))
+                val ruianResponse = ruianService.locationToAddress(JTSKLocation(bodyParts[0]!!, bodyParts[1]!!))
                 if(ruianResponse.isSuccessful && ruianResponse.body()!!.address != null) {
                     val ruianAddress = ruianResponse.body()!!.address!!.address
 
@@ -273,11 +293,14 @@ class LocationOfficeRepository @Inject constructor(private val officeDao: Office
                                             officeLocationResponse.body()!!.candidates[0].location
 
                                         val officeGPSLocResponse =
-                                            coordinateTranslationService.convertJTSKtoGPS(loc!!.x, loc!!.y)
+                                            coordinateTranslationService.convertLocationJTSKToGPS(
+                                                "${loc!!.x}+${loc!!.y}+0",
+                                                SimpleDateFormat("yyyy-MM-dd").format(Date())
+                                            )
 
                                         if (officeGPSLocResponse.isSuccessful) {
-                                            val officeGPSLoc = officeGPSLocResponse.body()
-                                            office.location = LatLng(officeGPSLoc!!.y!!.toDouble(), officeGPSLoc!!.x!!.toDouble())
+                                            val officeGPSLoc = officeGPSLocResponse.body()!!.coords!!.split(' ')
+                                            office.location = LatLng(officeGPSLoc[1]!!.toDouble(), officeGPSLoc[0]!!.toDouble())
                                             offices.add(office)
                                         } else {
                                             emit(BaseResult.Error(ErrorResponseType.LocationForOfficeError))
