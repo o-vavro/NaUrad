@@ -4,40 +4,40 @@ buildscript {
     ext {
         // SDK and tools
         minSdkVersion = 26
-        targetSdkVersion = 31
-        compileSdkVersion = 31
+        targetSdkVersion = 34
+        compileSdkVersion = 34
 
         // App dependencies
-        gradleVersion = "7.0.4"
-        kotlinVersion = "1.6.0"
-        appCompatVersion = "1.4.0"
+        gradleVersion = '8.1.0'
+        kotlinVersion = '1.9.22'
+        appCompatVersion = '1.6.1'
 
-        materialVersion = "1.4.0"
-        splashScreenVersion = "1.0.0-alpha01"
+        materialVersion = '1.11.0'
+        splashScreenVersion = '1.0.1'
 
-        constraintLayoutVersion = "2.1.1"
-        coroutinesVersion = "1.6.0"
-        dataStoreVersion = "1.0.0"
-        espressoVersion = "3.4.0"
-        fragmentVersion = "1.4.0"
-        junitVersion = "4.13.2"
-        ktxVersion = "1.7.0"
-        lifecycleVersion = "2.4.0"
-        gmsPlayServicesMapsVersion = "18.0.0"
-        gmsplayServicesLocationVersion = "19.0.1"
-        easyPermissionsVersion = "3.0.0"
-        protoBufferLiteVersion = "3.19.1"
+        constraintLayoutVersion = '2.1.4'
+        coroutinesVersion = '1.7.3'
+        dataStoreVersion = '1.0.0'
+        espressoVersion = '3.5.1'
+        fragmentVersion = '1.6.2'
+        junitVersion = '4.13.2'
+        ktxVersion = '1.12.0'
+        lifecycleVersion = '2.6.2'
+        gmsPlayServicesMapsVersion = '18.2.0'
+        gmsplayServicesLocationVersion = '21.0.1'
+        easyPermissionsVersion = '3.0.0'
+        protoBufferLiteVersion = '3.25.1'
 
-        navigationVersion = "2.3.5"
-        roomVersion = "2.3.0"
-        testExtJunitVersion = "1.1.2"
-        hiltAndroidXVersion = "1.0.0"
-        hiltVersion = "2.40.1"
-        kaptVersion = "2.40.1"
-        mapsVersionSecrets = "2.0.0"
-        retrofitVersion = "2.9.0"
-        okHttpVersion = "4.9.0"
-        gsonVersion = "2.8.9"
+        navigationVersion = '2.7.6'
+        roomVersion = '2.6.1'
+        testExtJunitVersion = '1.1.5'
+        hiltAndroidXVersion = '1.1.0'
+        hiltVersion = '2.50'
+        kaptVersion = '2.50'
+        mapsVersionSecrets = '2.0.1'
+        retrofitVersion = '2.9.0'
+        okHttpVersion = '4.12.0'
+        gsonVersion = '2.10.1'
     }
     repositories {
         google()

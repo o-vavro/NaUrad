@@ -16,7 +16,7 @@ interface TouchedLocationDao {
     fun getTouchedLocations(): Flow<List<TouchedLocation>>
 
     @Delete
-    suspend fun deleteTouchedLocation(location: TouchedLocation?)
+    suspend fun deleteTouchedLocation(location: TouchedLocation)
 
     @Query("DELETE FROM touched_location_table WHERE location LIKE :location AND address LIKE :address")
     suspend fun deleteTouchedLocation(location: LatLng, address: String)

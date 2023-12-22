@@ -119,6 +119,30 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         mProgress.hide()
     }
 
+    override fun onResume() {
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+        mapFragment?.onResume()
+        super.onResume()
+    }
+
+    override fun onPause() {
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+        mapFragment?.onPause()
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+        mapFragment?.onDestroy()
+        super.onDestroy()
+    }
+
+    override fun onLowMemory() {
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+        mapFragment?.onLowMemory()
+        super.onLowMemory()
+    }
+
     override fun onMapClick(pos: LatLng) {
         //mTapTextView.text = "tapped, point=$pos"
 
