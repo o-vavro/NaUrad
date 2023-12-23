@@ -75,7 +75,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
         setHasOptionsMenu(true)
 
         setFragmentResultListener("favourites_request") { _, bundle ->
-            val result = bundle.getParcelable<LocationWithOffices>("favourites_result")
+            val result = bundle.getParcelable("favourites_result", LocationWithOffices::class.java)
             viewModel.onFavouritesResult(result)
         }
     }
@@ -98,19 +98,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
 
         enableCurrentLocation()
 
-        val zlin = LatLng(49.230505, 17.657103)
-        /*var currentLocation: LatLng? = null
-        val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-        if (mMap.isMyLocationEnabled) {
-            val locationResult = fusedLocationProviderClient.lastLocation
-            locationResult.addOnCompleteListener(requireActivity()) { task ->
-                if (task.isSuccessful) {
-                    // Set the map's camera position to the current location of the device.
-                    currentLocation = LatLng(task.result.latitude, task.result.longitude)
-                }*/
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(viewModel.lastPosition /*?: (currentLocation*/ ?: zlin/*)*/, /*viewModel.lastZoom*/14.5f))
-            /*}
-        }*/
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(viewModel.lastPosition, 2.0f))
 
         observe()
         // re-place markers
@@ -258,19 +246,19 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
                         .title(marker.name)
                         .icon(when(marker.type) { // this should not be here!!!
                             OfficeType.CityGovernmentOffice ->
-                                    generateSmallIcon(context!!, R.drawable.ic_city_office)
+                                    generateSmallIcon(requireContext(), R.drawable.ic_city_office)
                                 OfficeType.LabourOffice ->
-                                    generateSmallIcon(context!!, R.drawable.ic_labour_office)
+                                    generateSmallIcon(requireContext(), R.drawable.ic_labour_office)
                                 OfficeType.TaxOffice ->
-                                    generateSmallIcon(context!!, R.drawable.ic_tax_office)
+                                    generateSmallIcon(requireContext(), R.drawable.ic_tax_office)
                                 OfficeType.CustomsOffice ->
-                                    generateSmallIcon(context!!, R.drawable.ic_customs_office)
+                                    generateSmallIcon(requireContext(), R.drawable.ic_customs_office)
                                 OfficeType.HighCourt ->
-                                    generateSmallIcon(context!!, R.drawable.ic_high_court)
+                                    generateSmallIcon(requireContext(), R.drawable.ic_high_court)
                                 OfficeType.RegionalCourt ->
-                                    generateSmallIcon(context!!, R.drawable.ic_regional_court)
+                                    generateSmallIcon(requireContext(), R.drawable.ic_regional_court)
                                 OfficeType.DistrictCourt ->
-                                    generateSmallIcon(context!!, R.drawable.ic_district_court)
+                                    generateSmallIcon(requireContext(), R.drawable.ic_district_court)
                         }))
                 mCurrentMarkers.add(mark)
                 cameraBounds.include(marker.location)
@@ -289,7 +277,7 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
     private fun handleFavourite(favourite: Boolean) {
         val favouriteMark = mMenu.findItem(R.id.action_mark_favourite)
         favouriteMark.isChecked = favourite
-        favouriteMark.icon = AppCompatResources.getDrawable(context!!, if (favouriteMark.isChecked) R.drawable.ic_star else R.drawable.ic_star_border)
+        favouriteMark.icon = AppCompatResources.getDrawable(requireContext(), if (favouriteMark.isChecked) R.drawable.ic_star else R.drawable.ic_star_border)
     }
 
     private fun handleShowFavourites() {
@@ -342,10 +330,10 @@ class MapsFragment : Fragment(R.layout.fragment_maps),
                     if (!mBinding.progress.isShown) {
                         item.isChecked = !item.isChecked
                         if (item.isChecked) {
-                            item.icon = AppCompatResources.getDrawable(context!!, R.drawable.ic_star)
+                            item.icon = AppCompatResources.getDrawable(requireContext(), R.drawable.ic_star)
                             viewModel.storeCurrentLocation()
                         } else {
-                            item.icon = AppCompatResources.getDrawable(context!!, R.drawable.ic_star_border)
+                            item.icon = AppCompatResources.getDrawable(requireContext(), R.drawable.ic_star_border)
                             viewModel.deleteCurrentLocation()
                         }
                     }

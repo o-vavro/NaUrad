@@ -27,12 +27,12 @@ class MapsViewModel @Inject constructor(
 
     private var mLastLocation: LocationWithOffices = LocationWithOffices(
         TouchedLocation(
-            LatLng(0.0, 0.0),
+            LatLng(49.230505, 17.657103),
             ""
         ),
         emptyList()
     )
-    val lastPosition: LatLng? get() = mLastLocation.location.location
+    val lastPosition: LatLng get() = mLastLocation.location.location
     /*private var mLastZoom: Float = 14.5f
     val lastZoom: Float get() = mLastZoom*/
 

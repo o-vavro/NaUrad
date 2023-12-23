@@ -14,8 +14,8 @@
         <!-- Customize your theme here. -->
     </style>
     <style name="Theme.NaUradSplashScreen" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/light_gold</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_fg</item>
+        <item name="windowSplashScreenBackground">@color/light_gold</item>
         <item name="postSplashScreenTheme">@style/Theme.NaUrad</item>
     </style>
 </resources>
